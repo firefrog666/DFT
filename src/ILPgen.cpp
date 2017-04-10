@@ -117,30 +117,17 @@ void ILPgen::path(int pathNumber){
 	}
 
 	//for 1 edge on the path, one of the neigbour path must be also on the path
+	for(Edge* e:g->edges){
+		string neibEdges = "";
+		for(Edge* neigbEdge:e->adjEdges){
+			neibEdges += S(" + ") + neigbEdge;
+		}
+		constraints.push_back(neibEdges+ S(" - ") + pathUseEdge(pathNumber,e) + S(" = 0"));
+	}
 
 	//path has no circle
 
-	/*	//if head use this node, then pathUsethisNode = 0
-		// pathUseNode - M(1-headUse) <= 0
-		// pathUseNode +M*headUse <= M
-		// pathUseNode +M(1-headUse) >=0
-		// pathUseNode - M* headUse >= -M
-		for(Node* n:g->nodes){
-			constraints.push_back(pathUseNode(pathNumber,n) + s(" + ") + s(M) + s(" ") + pathHeadUseNode(pathNumber,n) + s(" <= ") + s(M));
-			constraints.push_back(pathUseNode(pathNumber,n) + s(" - ") + s(M) + s(" ") + pathHeadUseNode(pathNumber,n) + s(" >= ") + s(-M));
-		}*/
 
-	/*//for a node which is not head or tail, adj edge if not wall then use 2;
-	for(Node* n:g->nodes){
-		string nodeUse2Edge = "";
-		for(Edge* e:n->getAdjEdges()){
-			nodeUse2Edge += S(" + ")+pathUseEdge(pathNumber,e);
-		}
-
-		//if head use this node, headUseOndge = 1
-		constraints.push_back(nodeUse2Edge+ S(" + ")+ S(M) + S(" ") + pathUseNode(pathNumber,n) + S(" <= ") + S(M+2));
-		constraints.push_back(nodeUse2Edge + S(" - ")+ S(M) + S(" ") + pathUseNode(pathNumber,n) + S(" >= ") + S(2-M));
-	}*/
 
 
 
@@ -158,7 +145,27 @@ void ILPgen::path(int pathNumber){
 
 
 
+/*	//if head use this node, then pathUsethisNode = 0
+	// pathUseNode - M(1-headUse) <= 0
+	// pathUseNode +M*headUse <= M
+	// pathUseNode +M(1-headUse) >=0
+	// pathUseNode - M* headUse >= -M
+	for(Node* n:g->nodes){
+		constraints.push_back(pathUseNode(pathNumber,n) + s(" + ") + s(M) + s(" ") + pathHeadUseNode(pathNumber,n) + s(" <= ") + s(M));
+		constraints.push_back(pathUseNode(pathNumber,n) + s(" - ") + s(M) + s(" ") + pathHeadUseNode(pathNumber,n) + s(" >= ") + s(-M));
+	}*/
 
+/*//for a node which is not head or tail, adj edge if not wall then use 2;
+for(Node* n:g->nodes){
+	string nodeUse2Edge = "";
+	for(Edge* e:n->getAdjEdges()){
+		nodeUse2Edge += S(" + ")+pathUseEdge(pathNumber,e);
+	}
+
+	//if head use this node, headUseOndge = 1
+	constraints.push_back(nodeUse2Edge+ S(" + ")+ S(M) + S(" ") + pathUseNode(pathNumber,n) + S(" <= ") + S(M+2));
+	constraints.push_back(nodeUse2Edge + S(" - ")+ S(M) + S(" ") + pathUseNode(pathNumber,n) + S(" >= ") + S(2-M));
+}*/
 
 
 

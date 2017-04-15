@@ -19,7 +19,7 @@ public:
 
 	Graph* g;
 
-	void pathToCoverAllEdges();
+	void pathToCoverAllEdges(const char* fileName);
 	void path(int pathNumber);
 	void addVar(string varName, int varType);
 

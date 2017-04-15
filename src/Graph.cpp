@@ -11,7 +11,7 @@
 using namespace std;
 Graph::Graph() {
 	// TODO Auto-generated constructor stub
-	cout << "i'm contrucing a graph"<< endl;
+	cout << "i'm construcing a graph"<< endl;
 
 }
 
@@ -132,6 +132,9 @@ void Graph::initTest(int w, int h){
 		}
 
 		hashAllEdges();
+
+		this->entrances.push_back(getNode(0,0));
+		this->exits.push_back(getNode(1,1));
 
 
 }

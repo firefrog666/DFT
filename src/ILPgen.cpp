@@ -8,28 +8,7 @@
 #include "ILPgen.h"
 #include "toolBox.h"
 #include "Graph.h"
-
-ILPgen::ILPgen() {
-	// TODO Auto-generated constructor stub
-
-}
-
-ILPgen::~ILPgen() {
-	// TODO Auto-generated destructor stub
-}
-
-
-//for a graph, write ILPs
-//find paths to cover all the edges
-void ILPgen::pathToCoverAllEdges(){
-	for(int i = 0; i <= 2; i++){
-		//find a path
-	}
-
-	//path cover all the edges
-
-}
-
+#include "writeILP.h"
 __inline__ string getPathName(int pathNumber){
 	return  s("p") + s(pathNumber);
 }
@@ -46,6 +25,51 @@ __inline__ string pathTailUseNode(int pathNumber, Node* node){
 __inline__ string pathUseEdge(int pathNumber, Edge* edge){
 	return getPathName(pathNumber) + s("Use") + edge->name;
 }
+
+__inline__ string pathNodeFlow(int pathNumber, Node* node){
+	return getPathName(pathNumber) + s("Flow") + node->name;
+}
+__inline__ string pathEdgeFlow(int pathNumber, Edge* edge){
+	return getPathName(pathNumber) + s("Flow") + edge->name;
+}
+
+__inline__ string pathSuperFlow(int pathNumber){
+	return getPathName(pathNumber) + s("SuperFlow");
+}
+
+ILPgen::ILPgen() {
+	// TODO Auto-generated constructor stub
+
+}
+
+ILPgen::~ILPgen() {
+	// TODO Auto-generated destructor stub
+}
+
+
+//for a graph, write ILPs
+//find paths to cover all the edges
+void ILPgen::pathToCoverAllEdges(const char* fileName){
+	int pathNumber = 2;
+	for(int i = 0; i <= pathNumber-1; i++){
+		path(i);
+	}
+
+	//path cover all the edges
+	for(Edge* e:g->edges){
+		string edgeUsedOnce = "";
+		for(int i = 0; i <= pathNumber-1; i ++){
+			edgeUsedOnce += S(" + ") + pathUseEdge(i,e);
+		}
+		constraints.push_back(edgeUsedOnce + S(" >= 1"));
+	}
+
+	writeILP ilp;
+	ilp.writeConstraint(constraints,fileName);
+	ilp.writeVarNames(this->variables,this->variableTypes,fileName);
+}
+
+
 
 //0 for integer, 1 for binary
 void ILPgen::addVar(string variableName, int variableType){
@@ -91,12 +115,13 @@ void ILPgen::path(int pathNumber){
 	onlyOneHead += s(" = 1");
 	constraints.push_back(onlyOneHead);
 	//there is only one tail
+
 	string onlyOneTail = "";
 	for(Node* n:g->nodes){
 		onlyOneTail += s(" + ") + pathTailUseNode(pathNumber,n);
 	}
-	onlyOneHead += s(" = 1");
-	constraints.push_back(onlyOneHead);
+	onlyOneTail+= s(" = 1");
+	constraints.push_back(onlyOneTail);
 
 
 
@@ -105,6 +130,8 @@ void ILPgen::path(int pathNumber){
 		string headUseOneEdge = "";
 		string tailUseOneEdge = "";
 		for(Edge* e:n->getAdjEdges()){
+			if(e->isWall)
+				continue;
 			headUseOneEdge += S(" + ")+pathUseEdge(pathNumber,e);
 			tailUseOneEdge += S(" + ")+pathUseEdge(pathNumber,e);
 		}
@@ -120,17 +147,56 @@ void ILPgen::path(int pathNumber){
 	for(Edge* e:g->edges){
 		string neibEdges = "";
 		for(Edge* neigbEdge:e->adjEdges){
-			neibEdges += S(" + ") + neigbEdge;
+			if(neigbEdge->isWall)
+				continue;
+			neibEdges += S(" + ") + pathUseEdge(pathNumber,e);
 		}
 		constraints.push_back(neibEdges+ S(" - ") + pathUseEdge(pathNumber,e) + S(" = 0"));
 	}
 
-	//path has no circle
+	//if one edge is used on the path, all 2 nodes on it are also on the path;
 
+	for(Edge* e:g->edges){
+		Node* n0 = g->getNode(e->x,e->y);
+		Node* n1 = g->getNode(e->s,e->t);
+		constraints.push_back(pathUseNode(pathNumber,n0) + S(" + ") + S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" <= ") + S(1 + M));
+		constraints.push_back(pathUseNode(pathNumber,n0) + S(" - ") + S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" >= ") + S(1 - M));
+		constraints.push_back(pathUseNode(pathNumber,n1) + S(" + ") + S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" <= ") + S(1 + M));
+		constraints.push_back(pathUseNode(pathNumber,n1) + S(" - ") + S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" >= ") + S(1 - M));
+	}
 
+	/*//path has no circle
 
+	//for a node not head or tail
+	//flowIn = flowOut + 1
 
+	//for a not used edge, flow = 0
+	for(Edge* e:g->edges){
+		addVar(pathEdgeFlow(pathNumber,e),0);
+		constraints.push_back(pathEdgeFlow(pathNumber,e) + S(" - ") + S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" <= 0"));
+		constraints.push_back(pathEdgeFlow(pathNumber,e) + S(" + ") + S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" >= 0"));
+	}
 
+	//for a node if node is used and node is not head
+	//then then in flow = out flow + 1
+	for(Node* n:g->nodes){
+		string flowOnNode = "";
+		for(Edge* adjEdge:n->getAdjEdges()){
+			if(adjEdge->isWall)
+				continue;
+			if(adjEdge->edgeOutOfNode(n)){
+				flowOnNode += S(" - ") + pathEdgeFlow(pathNumber,adjEdge);
+			}
+			else{
+				flowOnNode += S(" + ") + pathEdgeFlow(pathNumber, adjEdge);
+			}
+		}
+		constraints.push_back(flowOnNode + S(" + ") + S(M) + S(" ") + pathUseNode(pathNumber,n) + S(" - ") +S(M)+S(" ") + pathHeadUseNode(pathNumber,n)
+				+ S(" - ") + S(M) + S(" ") + pathTailUseNode(pathNumber,n) + S(" <= ") + S(1 + M));
+		constraints.push_back(flowOnNode + S(" - ") + S(M) + S(" ") + pathUseNode(pathNumber,n) + S(" + ") +S(M)+S(" ") + pathHeadUseNode(pathNumber,n)
+				+ S(" + ") + S(M) + S(" ") + pathTailUseNode(pathNumber,n) + S(" >= ") + S(1 - M));
+	}
+*/
 }
 
 

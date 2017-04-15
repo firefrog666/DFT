@@ -23,7 +23,7 @@ public:
 	Node();
 	Node(int a, int b){
 		x = a; y = b;
-		name = s("n") + s("x")+s(x)+s("y")+s(x);
+		name = s("n") + s("x")+s(x)+s("y")+s(y);
 		hashValue = algo::hash2Int(a,b);
 		cout << "node " << a << " " << b << " has been created" << endl;
 		cout << "node name is" << name << endl;
@@ -67,8 +67,18 @@ public:
 	int x,y,s,t;
 	int hashValue;
 	string name;
+	bool isWall;
+	bool isHole;
 
 public:
+	bool edgeOutOfNode(Node* n){
+		if(n->x == this->x && n->y == this->y){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
 	void setAdjNodes(const vector<Node*>& nodes){
 		adjNodes = nodes;
 	}
@@ -100,10 +110,10 @@ public:
 	vector<Node*> entrances;
 	vector<Node*> exits;
 
+	Edge* getEdge(Node* start, Node* end);
+	Node* getNode(int i, int j);
 private:
 	void getHashEdges();
-	Node* getNode(int i, int j);
-	Edge* getEdge(Node* start, Node* end);
 public:
 	static int hash2Nodes(Node* a, Node* b);
 	void initTest(int w, int h);

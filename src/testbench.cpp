@@ -1,12 +1,20 @@
 #include "Graph.h"
+#include "ILPgen.h"
+#include "ILP.h"
 
 
 #include <iostream>
 using namespace std;
 
 int main() {
-	Graph g = Graph();
-	g.initTest(2,2);
+	const char* ilpFileName = "pathCoverAllEdges.lp";
+	Graph* g = new Graph();
+	g->initTest(2,2);
 
+	ILPgen ilpGen;
+	ilpGen.g = g;
+	ilpGen.pathToCoverAllEdges(ilpFileName);
+	ILP::ILP_solve(ilpFileName);
 	return 0;
 }
+

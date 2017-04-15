@@ -59,8 +59,7 @@ void setTime(double i){
 	timeMax = i;
 }*/
 
-std::map<std::string,int>
-ILP_solve(char* argv)
+std::map<std::string,int>	ILP::ILP_solve(const char* argv)
 {
 
 	map<string, int > results;

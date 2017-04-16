@@ -68,11 +68,14 @@ Edge::Edge(Node* a, Node* b){
 		b = temp;
 	}
 
+	isWall = 0;
+	isHole = 0;
+
 	x = a->x;
 	y = a->y;
 	s = b->x;
 	t = b->y;
-	name = S("e") + S("x")+S(x)+S("y")+S(x)+S("s")+S(s)+S("t")+S(t);
+	name = S("e") + S("x")+S(x)+S("y")+S(y)+S("s")+S(s)+S("t")+S(t);
 
 	cout<<"edge "<< x << " "<< y <<" "<<s<<" "<<t<<" "<< "has been created"<< endl;
 	cout<<"hashValue is "<<hashValue<<endl;
@@ -95,6 +98,36 @@ void Graph::hashAllEdges(){
 			}
 		}
 	}
+
+	//set adjEdge to every node
+	for(Node* n:nodes){
+		for(Node* neigbour:n->getAdjNodes()){
+			//if edge exit
+			Edge* e = getEdge(n,neigbour);
+			if(e != NULL){
+				n->addAdjEdges(e);
+			}
+
+		}
+	}
+
+	//set adjEdge to every edge
+	for(Edge* e:edges){
+		Node* n0 = getNode(e->x,e->y);
+		Node* n1 = getNode(e->s,e->t);
+
+		for(Edge* adjEdge:n0->getAdjEdges()){
+			if(adjEdge != e){
+				e->adjEdges.push_back(adjEdge);
+			}
+		}
+
+		for(Edge* adjEdge:n1->getAdjEdges()){
+			if(adjEdge != e){
+				e->adjEdges.push_back(adjEdge);
+			}
+		}
+ 	}
 }
 
 void Graph::initTest(int w, int h){
@@ -134,7 +167,7 @@ void Graph::initTest(int w, int h){
 		hashAllEdges();
 
 		this->entrances.push_back(getNode(0,0));
-		this->exits.push_back(getNode(1,1));
+		this->exits.push_back(getNode(w-1,h-1));
 
 
 }

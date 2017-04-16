@@ -44,6 +44,9 @@ public:
 	void addAdjNodes(Node* node){
 		adjNodes.push_back(node);
 	}
+	void addAdjEdges(Edge* e){
+			adjEdges.push_back(e);
+	}
 
 	vector<Node*>  getAdjNodes(){
 		return adjNodes;
@@ -60,7 +63,7 @@ public:
 
 class Edge{
 public:
-	Edge();
+	Edge(){isWall = 0; isHole = 0;}
 	Edge(Node* a, Node * b);
 	vector<Node*> adjNodes;
 	vector<Edge*> adjEdges;

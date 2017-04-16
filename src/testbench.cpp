@@ -9,7 +9,7 @@ using namespace std;
 int main() {
 	const char* ilpFileName = "pathCoverAllEdges.lp";
 	Graph* g = new Graph();
-	g->initTest(2,2);
+	g->initTest(3,3);
 
 	ILPgen ilpGen;
 	ilpGen.g = g;

@@ -1,0 +1,645 @@
+i'm construcing a graph
+node 0 0 has been created
+node name isnx0y0
+node 0 1 has been created
+node name isnx0y1
+node 1 0 has been created
+node name isnx1y0
+node 1 1 has been created
+node name isnx1y1
+finding 1
+can't find the Edge
+edge 0 0 0 1 has been created
+hashValue is 1
+edge name = ex0y0s0t1
+finding 1000
+can't find the Edge
+edge 0 0 1 0 has been created
+hashValue is 1000
+edge name = ex0y0s1t0
+finding 1
+finding 1001001
+can't find the Edge
+edge 0 1 1 1 has been created
+hashValue is 1001001
+edge name = ex0y0s1t1
+finding 1000
+finding 1000001001
+can't find the Edge
+edge 1 0 1 1 has been created
+hashValue is 1000001001
+edge name = ex1y1s1t1
+finding 1001001
+finding 1000001001
+finding 1
+finding 1000
+finding 1
+finding 1001001
+finding 1000
+finding 1000001001
+finding 1001001
+finding 1000001001
+Read LP format model from file pathCoverAllEdges.lp
+Reading time = 0.00 seconds
+(null): 124 rows, 40 columns, 348 nonzeros
+Optimize a model with 124 rows, 40 columns and 348 nonzeros
+Coefficient statistics:
+  Matrix range    [1e+00, 1e+04]
+  Objective range [0e+00, 0e+00]
+  Bounds range    [1e+00, 1e+00]
+  RHS range       [1e+00, 1e+04]
+Found heuristic solution: objective 0
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Time limit reached
+Best objective 0.000000000000e+00, best bound -, gap -
+Optimization was stopped with status = 9
+Optimal objective: 0
+p0HeadUsenx0y0 1
+p0TailUsenx1y1 1
+p0HeadUsenx0y1 0
+p0HeadUsenx1y0 0
+p0HeadUsenx1y1 0
+p0TailUsenx0y0 0
+p0TailUsenx0y1 0
+p0TailUsenx1y0 0
+p0Useex0y0s0t1 0
+p0Useex0y0s1t0 1
+p0Useex0y0s1t1 0
+p0Useex1y1s1t1 1
+p0Usenx0y0 1
+p0Usenx0y1 0
+p0Usenx1y0 1
+p0Usenx1y1 1
+p0Flowex0y0s0t1 0
+p0Flowex0y0s1t0 1
+p0Flowex0y0s1t1 0
+p0Flowex1y1s1t1 0
+p1HeadUsenx0y0 1
+p1TailUsenx1y1 1
+p1HeadUsenx0y1 0
+p1HeadUsenx1y0 0
+p1HeadUsenx1y1 0
+p1TailUsenx0y0 0
+p1TailUsenx0y1 0
+p1TailUsenx1y0 0
+p1Useex0y0s0t1 1
+p1Useex0y0s1t0 0
+p1Useex0y0s1t1 1
+p1Useex1y1s1t1 0
+p1Usenx0y0 1
+p1Usenx0y1 1
+p1Usenx1y0 0
+p1Usenx1y1 1
+p1Flowex0y0s0t1 1
+p1Flowex0y0s1t0 0
+p1Flowex0y0s1t1 0
+p1Flowex1y1s1t1 0
+i'm construcing a graph
+node 0 0 has been created
+node name isnx0y0
+node 0 1 has been created
+node name isnx0y1
+node 0 2 has been created
+node name isnx0y2
+node 1 0 has been created
+node name isnx1y0
+node 1 1 has been created
+node name isnx1y1
+node 1 2 has been created
+node name isnx1y2
+node 2 0 has been created
+node name isnx2y0
+node 2 1 has been created
+node name isnx2y1
+node 2 2 has been created
+node name isnx2y2
+finding 1
+can't find the Edge
+edge 0 0 0 1 has been created
+hashValue is 1
+edge name = ex0y0s0t1
+finding 1000
+can't find the Edge
+edge 0 0 1 0 has been created
+hashValue is 1000
+edge name = ex0y0s1t0
+finding 1
+finding 1000002
+can't find the Edge
+edge 0 1 0 2 has been created
+hashValue is 1000002
+edge name = ex0y1s0t2
+finding 1001001
+can't find the Edge
+edge 0 1 1 1 has been created
+hashValue is 1001001
+edge name = ex0y1s1t1
+finding 1000002
+finding 2001002
+can't find the Edge
+edge 0 2 1 2 has been created
+hashValue is 2001002
+edge name = ex0y2s1t2
+finding 1000
+finding 1000001001
+can't find the Edge
+edge 1 0 1 1 has been created
+hashValue is 1000001001
+edge name = ex1y0s1t1
+finding 1000002000
+can't find the Edge
+edge 1 0 2 0 has been created
+hashValue is 1000002000
+edge name = ex1y0s2t0
+finding 1001001
+finding 1000001001
+finding 1001001002
+can't find the Edge
+edge 1 1 1 2 has been created
+hashValue is 1001001002
+edge name = ex1y1s1t2
+finding 1001002001
+can't find the Edge
+edge 1 1 2 1 has been created
+hashValue is 1001002001
+edge name = ex1y1s2t1
+finding 2001002
+finding 1001001002
+finding 1002002002
+can't find the Edge
+edge 1 2 2 2 has been created
+hashValue is 1002002002
+edge name = ex1y2s2t2
+finding 1000002000
+finding 2000002001
+can't find the Edge
+edge 2 0 2 1 has been created
+hashValue is 2000002001
+edge name = ex2y0s2t1
+finding 1001002001
+finding 2000002001
+finding 2001002002
+can't find the Edge
+edge 2 1 2 2 has been created
+hashValue is 2001002002
+edge name = ex2y1s2t2
+finding 1002002002
+finding 2001002002
+finding 1
+finding 1000
+finding 1
+finding 1000002
+finding 1001001
+finding 1000002
+finding 2001002
+finding 1000
+finding 1000001001
+finding 1000002000
+finding 1001001
+finding 1000001001
+finding 1001001002
+finding 1001002001
+finding 2001002
+finding 1001001002
+finding 1002002002
+finding 1000002000
+finding 2000002001
+finding 1001002001
+finding 2000002001
+finding 2001002002
+finding 1002002002
+finding 2001002002
+Read LP format model from file pathCoverAllEdges.lp
+Reading time = 0.00 seconds
+(null): 604 rows, 204 columns, 2048 nonzeros
+Optimize a model with 604 rows, 204 columns and 2048 nonzeros
+Coefficient statistics:
+  Matrix range    [1e+00, 1e+04]
+  Objective range [0e+00, 0e+00]
+  Bounds range    [1e+00, 1e+00]
+  RHS range       [1e+00, 1e+04]
+Presolve removed 376 rows and 104 columns
+Presolve time: 0.00s
+Presolved: 228 rows, 100 columns, 652 nonzeros
+Variable types: 0 continuous, 100 integer (52 binary)
+Found heuristic solution: objective 0.0000000
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 4 (of 4 available processors)
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 0.000000000000e+00, best bound 0.000000000000e+00, gap 0.0%
+Optimal objective: 0
+p0HeadUsenx0y0 1
+p0TailUsenx2y2 1
+p0HeadUsenx0y1 0
+p0HeadUsenx0y2 0
+p0HeadUsenx1y0 0
+p0HeadUsenx1y1 0
+p0HeadUsenx1y2 0
+p0HeadUsenx2y0 0
+p0HeadUsenx2y1 0
+p0HeadUsenx2y2 0
+p0TailUsenx0y0 0
+p0TailUsenx0y1 0
+p0TailUsenx0y2 0
+p0TailUsenx1y0 0
+p0TailUsenx1y1 0
+p0TailUsenx1y2 0
+p0TailUsenx2y0 0
+p0TailUsenx2y1 0
+p0Useex0y0s0t1 1
+p0Useex0y0s1t0 0
+p0Useex0y1s0t2 1
+p0Useex0y1s1t1 0
+p0Useex0y2s1t2 1
+p0Useex1y0s1t1 0
+p0Useex1y0s2t0 0
+p0Useex1y1s1t2 0
+p0Useex1y1s2t1 0
+p0Useex1y2s2t2 1
+p0Useex2y0s2t1 0
+p0Useex2y1s2t2 0
+p0Usenx0y0 1
+p0Usenx0y1 1
+p0Usenx0y2 1
+p0Usenx1y0 0
+p0Usenx1y1 0
+p0Usenx1y2 1
+p0Usenx2y0 0
+p0Usenx2y1 0
+p0Usenx2y2 1
+p0Flowex0y0s0t1 3
+p0Flowex0y0s1t0 0
+p0Flowex0y1s0t2 2
+p0Flowex0y1s1t1 0
+p0Flowex0y2s1t2 1
+p0Flowex1y0s1t1 0
+p0Flowex1y0s2t0 0
+p0Flowex1y1s1t2 0
+p0Flowex1y1s2t1 0
+p0Flowex1y2s2t2 0
+p0Flowex2y0s2t1 0
+p0Flowex2y1s2t2 0
+p1HeadUsenx0y0 1
+p1TailUsenx2y2 1
+p1HeadUsenx0y1 0
+p1HeadUsenx0y2 0
+p1HeadUsenx1y0 0
+p1HeadUsenx1y1 0
+p1HeadUsenx1y2 0
+p1HeadUsenx2y0 0
+p1HeadUsenx2y1 0
+p1HeadUsenx2y2 0
+p1TailUsenx0y0 0
+p1TailUsenx0y1 0
+p1TailUsenx0y2 0
+p1TailUsenx1y0 0
+p1TailUsenx1y1 0
+p1TailUsenx1y2 0
+p1TailUsenx2y0 0
+p1TailUsenx2y1 0
+p1Useex0y0s0t1 1
+p1Useex0y0s1t0 0
+p1Useex0y1s0t2 0
+p1Useex0y1s1t1 1
+p1Useex0y2s1t2 0
+p1Useex1y0s1t1 0
+p1Useex1y0s2t0 0
+p1Useex1y1s1t2 1
+p1Useex1y1s2t1 0
+p1Useex1y2s2t2 1
+p1Useex2y0s2t1 0
+p1Useex2y1s2t2 0
+p1Usenx0y0 1
+p1Usenx0y1 1
+p1Usenx0y2 0
+p1Usenx1y0 0
+p1Usenx1y1 1
+p1Usenx1y2 1
+p1Usenx2y0 0
+p1Usenx2y1 0
+p1Usenx2y2 1
+p1Flowex0y0s0t1 3
+p1Flowex0y0s1t0 0
+p1Flowex0y1s0t2 0
+p1Flowex0y1s1t1 2
+p1Flowex0y2s1t2 0
+p1Flowex1y0s1t1 0
+p1Flowex1y0s2t0 0
+p1Flowex1y1s1t2 1
+p1Flowex1y1s2t1 0
+p1Flowex1y2s2t2 0
+p1Flowex2y0s2t1 0
+p1Flowex2y1s2t2 0
+p2HeadUsenx0y0 1
+p2TailUsenx2y2 1
+p2HeadUsenx0y1 0
+p2HeadUsenx0y2 0
+p2HeadUsenx1y0 0
+p2HeadUsenx1y1 0
+p2HeadUsenx1y2 0
+p2HeadUsenx2y0 0
+p2HeadUsenx2y1 0
+p2HeadUsenx2y2 0
+p2TailUsenx0y0 0
+p2TailUsenx0y1 0
+p2TailUsenx0y2 0
+p2TailUsenx1y0 0
+p2TailUsenx1y1 0
+p2TailUsenx1y2 0
+p2TailUsenx2y0 0
+p2TailUsenx2y1 0
+p2Useex0y0s0t1 0
+p2Useex0y0s1t0 1
+p2Useex0y1s0t2 0
+p2Useex0y1s1t1 0
+p2Useex0y2s1t2 0
+p2Useex1y0s1t1 0
+p2Useex1y0s2t0 1
+p2Useex1y1s1t2 0
+p2Useex1y1s2t1 0
+p2Useex1y2s2t2 0
+p2Useex2y0s2t1 1
+p2Useex2y1s2t2 1
+p2Usenx0y0 1
+p2Usenx0y1 0
+p2Usenx0y2 0
+p2Usenx1y0 1
+p2Usenx1y1 0
+p2Usenx1y2 0
+p2Usenx2y0 1
+p2Usenx2y1 1
+p2Usenx2y2 1
+p2Flowex0y0s0t1 0
+p2Flowex0y0s1t0 3
+p2Flowex0y1s0t2 0
+p2Flowex0y1s1t1 0
+p2Flowex0y2s1t2 0
+p2Flowex1y0s1t1 0
+p2Flowex1y0s2t0 2
+p2Flowex1y1s1t2 0
+p2Flowex1y1s2t1 0
+p2Flowex1y2s2t2 0
+p2Flowex2y0s2t1 1
+p2Flowex2y1s2t2 0
+p3HeadUsenx0y0 1
+p3TailUsenx2y2 1
+p3HeadUsenx0y1 0
+p3HeadUsenx0y2 0
+p3HeadUsenx1y0 0
+p3HeadUsenx1y1 0
+p3HeadUsenx1y2 0
+p3HeadUsenx2y0 0
+p3HeadUsenx2y1 0
+p3HeadUsenx2y2 0
+p3TailUsenx0y0 0
+p3TailUsenx0y1 0
+p3TailUsenx0y2 0
+p3TailUsenx1y0 0
+p3TailUsenx1y1 0
+p3TailUsenx1y2 0
+p3TailUsenx2y0 0
+p3TailUsenx2y1 0
+p3Useex0y0s0t1 0
+p3Useex0y0s1t0 1
+p3Useex0y1s0t2 0
+p3Useex0y1s1t1 0
+p3Useex0y2s1t2 0
+p3Useex1y0s1t1 1
+p3Useex1y0s2t0 0
+p3Useex1y1s1t2 0
+p3Useex1y1s2t1 1
+p3Useex1y2s2t2 0
+p3Useex2y0s2t1 0
+p3Useex2y1s2t2 1
+p3Usenx0y0 1
+p3Usenx0y1 0
+p3Usenx0y2 0
+p3Usenx1y0 1
+p3Usenx1y1 1
+p3Usenx1y2 0
+p3Usenx2y0 0
+p3Usenx2y1 1
+p3Usenx2y2 1
+p3Flowex0y0s0t1 0
+p3Flowex0y0s1t0 3
+p3Flowex0y1s0t2 0
+p3Flowex0y1s1t1 0
+p3Flowex0y2s1t2 0
+p3Flowex1y0s1t1 2
+p3Flowex1y0s2t0 0
+p3Flowex1y1s1t2 0
+p3Flowex1y1s2t1 1
+p3Flowex1y2s2t2 0
+p3Flowex2y0s2t1 0
+p3Flowex2y1s2t2 0
+p0HeadUsenx0y0 1
+p0TailUsenx2y2 1
+p0HeadUsenx0y1 0
+p0HeadUsenx0y2 0
+p0HeadUsenx1y0 0
+p0HeadUsenx1y1 0
+p0HeadUsenx1y2 0
+p0HeadUsenx2y0 0
+p0HeadUsenx2y1 0
+p0HeadUsenx2y2 0
+p0TailUsenx0y0 0
+p0TailUsenx0y1 0
+p0TailUsenx0y2 0
+p0TailUsenx1y0 0
+p0TailUsenx1y1 0
+p0TailUsenx1y2 0
+p0TailUsenx2y0 0
+p0TailUsenx2y1 0
+p0Useex0y0s0t1 1
+p0Useex0y0s1t0 0
+p0Useex0y1s0t2 1
+p0Useex0y1s1t1 0
+p0Useex0y2s1t2 1
+p0Useex1y0s1t1 0
+p0Useex1y0s2t0 0
+p0Useex1y1s1t2 0
+p0Useex1y1s2t1 0
+p0Useex1y2s2t2 1
+p0Useex2y0s2t1 0
+p0Useex2y1s2t2 0
+p0Usenx0y0 1
+p0Usenx0y1 1
+p0Usenx0y2 1
+p0Usenx1y0 0
+p0Usenx1y1 0
+p0Usenx1y2 1
+p0Usenx2y0 0
+p0Usenx2y1 0
+p0Usenx2y2 1
+p0Flowex0y0s0t1 3
+p0Flowex0y0s1t0 0
+p0Flowex0y1s0t2 2
+p0Flowex0y1s1t1 0
+p0Flowex0y2s1t2 1
+p0Flowex1y0s1t1 0
+p0Flowex1y0s2t0 0
+p0Flowex1y1s1t2 0
+p0Flowex1y1s2t1 0
+p0Flowex1y2s2t2 0
+p0Flowex2y0s2t1 0
+p0Flowex2y1s2t2 0
+p1HeadUsenx0y0 1
+p1TailUsenx2y2 1
+p1HeadUsenx0y1 0
+p1HeadUsenx0y2 0
+p1HeadUsenx1y0 0
+p1HeadUsenx1y1 0
+p1HeadUsenx1y2 0
+p1HeadUsenx2y0 0
+p1HeadUsenx2y1 0
+p1HeadUsenx2y2 0
+p1TailUsenx0y0 0
+p1TailUsenx0y1 0
+p1TailUsenx0y2 0
+p1TailUsenx1y0 0
+p1TailUsenx1y1 0
+p1TailUsenx1y2 0
+p1TailUsenx2y0 0
+p1TailUsenx2y1 0
+p1Useex0y0s0t1 1
+p1Useex0y0s1t0 0
+p1Useex0y1s0t2 0
+p1Useex0y1s1t1 1
+p1Useex0y2s1t2 0
+p1Useex1y0s1t1 0
+p1Useex1y0s2t0 0
+p1Useex1y1s1t2 1
+p1Useex1y1s2t1 0
+p1Useex1y2s2t2 1
+p1Useex2y0s2t1 0
+p1Useex2y1s2t2 0
+p1Usenx0y0 1
+p1Usenx0y1 1
+p1Usenx0y2 0
+p1Usenx1y0 0
+p1Usenx1y1 1
+p1Usenx1y2 1
+p1Usenx2y0 0
+p1Usenx2y1 0
+p1Usenx2y2 1
+p1Flowex0y0s0t1 3
+p1Flowex0y0s1t0 0
+p1Flowex0y1s0t2 0
+p1Flowex0y1s1t1 2
+p1Flowex0y2s1t2 0
+p1Flowex1y0s1t1 0
+p1Flowex1y0s2t0 0
+p1Flowex1y1s1t2 1
+p1Flowex1y1s2t1 0
+p1Flowex1y2s2t2 0
+p1Flowex2y0s2t1 0
+p1Flowex2y1s2t2 0
+p2HeadUsenx0y0 1
+p2TailUsenx2y2 1
+p2HeadUsenx0y1 0
+p2HeadUsenx0y2 0
+p2HeadUsenx1y0 0
+p2HeadUsenx1y1 0
+p2HeadUsenx1y2 0
+p2HeadUsenx2y0 0
+p2HeadUsenx2y1 0
+p2HeadUsenx2y2 0
+p2TailUsenx0y0 0
+p2TailUsenx0y1 0
+p2TailUsenx0y2 0
+p2TailUsenx1y0 0
+p2TailUsenx1y1 0
+p2TailUsenx1y2 0
+p2TailUsenx2y0 0
+p2TailUsenx2y1 0
+p2Useex0y0s0t1 0
+p2Useex0y0s1t0 1
+p2Useex0y1s0t2 0
+p2Useex0y1s1t1 0
+p2Useex0y2s1t2 0
+p2Useex1y0s1t1 0
+p2Useex1y0s2t0 1
+p2Useex1y1s1t2 0
+p2Useex1y1s2t1 0
+p2Useex1y2s2t2 0
+p2Useex2y0s2t1 1
+p2Useex2y1s2t2 1
+p2Usenx0y0 1
+p2Usenx0y1 0
+p2Usenx0y2 0
+p2Usenx1y0 1
+p2Usenx1y1 0
+p2Usenx1y2 0
+p2Usenx2y0 1
+p2Usenx2y1 1
+p2Usenx2y2 1
+p2Flowex0y0s0t1 0
+p2Flowex0y0s1t0 3
+p2Flowex0y1s0t2 0
+p2Flowex0y1s1t1 0
+p2Flowex0y2s1t2 0
+p2Flowex1y0s1t1 0
+p2Flowex1y0s2t0 2
+p2Flowex1y1s1t2 0
+p2Flowex1y1s2t1 0
+p2Flowex1y2s2t2 0
+p2Flowex2y0s2t1 1
+p2Flowex2y1s2t2 0
+p3HeadUsenx0y0 1
+p3TailUsenx2y2 1
+p3HeadUsenx0y1 0
+p3HeadUsenx0y2 0
+p3HeadUsenx1y0 0
+p3HeadUsenx1y1 0
+p3HeadUsenx1y2 0
+p3HeadUsenx2y0 0
+p3HeadUsenx2y1 0
+p3HeadUsenx2y2 0
+p3TailUsenx0y0 0
+p3TailUsenx0y1 0
+p3TailUsenx0y2 0
+p3TailUsenx1y0 0
+p3TailUsenx1y1 0
+p3TailUsenx1y2 0
+p3TailUsenx2y0 0
+p3TailUsenx2y1 0
+p3Useex0y0s0t1 0
+p3Useex0y0s1t0 1
+p3Useex0y1s0t2 0
+p3Useex0y1s1t1 0
+p3Useex0y2s1t2 0
+p3Useex1y0s1t1 1
+p3Useex1y0s2t0 0
+p3Useex1y1s1t2 0
+p3Useex1y1s2t1 1
+p3Useex1y2s2t2 0
+p3Useex2y0s2t1 0
+p3Useex2y1s2t2 1
+p3Usenx0y0 1
+p3Usenx0y1 0
+p3Usenx0y2 0
+p3Usenx1y0 1
+p3Usenx1y1 1
+p3Usenx1y2 0
+p3Usenx2y0 0
+p3Usenx2y1 1
+p3Usenx2y2 1
+p3Flowex0y0s0t1 0
+p3Flowex0y0s1t0 3
+p3Flowex0y1s0t2 0
+p3Flowex0y1s1t1 0
+p3Flowex0y2s1t2 0
+p3Flowex1y0s1t1 2
+p3Flowex1y0s2t0 0
+p3Flowex1y1s1t2 0
+p3Flowex1y1s2t1 1
+p3Flowex1y2s2t2 0
+p3Flowex2y0s2t1 0
+p3Flowex2y1s2t2 0
+size of results is 9792

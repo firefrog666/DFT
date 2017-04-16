@@ -50,7 +50,7 @@ ILPgen::~ILPgen() {
 //for a graph, write ILPs
 //find paths to cover all the edges
 void ILPgen::pathToCoverAllEdges(const char* fileName){
-	int pathNumber = 2;
+	int pathNumber = 4;
 	for(int i = 0; i <= pathNumber-1; i++){
 		path(i);
 	}
@@ -143,15 +143,33 @@ void ILPgen::path(int pathNumber){
 		constraints.push_back(tailUseOneEdge + S(" - ")+ S(M) + S(" ") + pathTailUseNode(pathNumber,n) + S(" >= ") + S(1-M));
 	}
 
-	//for 1 edge on the path, one of the neigbour path must be also on the path
+	/*//for 1 edge on the path, one of the neigbour path must be also on the path
 	for(Edge* e:g->edges){
 		string neibEdges = "";
 		for(Edge* neigbEdge:e->adjEdges){
 			if(neigbEdge->isWall)
 				continue;
-			neibEdges += S(" + ") + pathUseEdge(pathNumber,e);
+			neibEdges += S(" + ") + pathUseEdge(pathNumber,neigbEdge);
 		}
-		constraints.push_back(neibEdges+ S(" - ") + pathUseEdge(pathNumber,e) + S(" = 0"));
+		constraints.push_back(neibEdges+ S(" + ") +S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" <= ") + S(1+M));
+		constraints.push_back(neibEdges+ S(" - ") +S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" >= ") + S(1-M));
+	}*/
+
+	//for one node on path, if not head or tail, 2 neigbour edge on path
+	//if head or tail, 1 neigbour edge
+
+	for(Node* n:g->nodes){
+		string neibourEdges = "";
+		for(Edge* neibourEdge: n->getAdjEdges()){
+			if(neibourEdge->isWall){
+				continue;
+			}
+			neibourEdges += S(" + ") + pathUseEdge(pathNumber, neibourEdge);
+		}
+		constraints.push_back(neibourEdges+ S(" + ") +S(M) + S(" ") + pathUseNode(pathNumber,n) +S(" + ") + pathHeadUseNode(pathNumber,n)
+				+S(" + ") + pathTailUseNode(pathNumber,n)+ S(" <= ") + S(2+M));
+		constraints.push_back(neibourEdges+ S(" - ") +S(M) + S(" ") + pathUseNode(pathNumber,n) +S(" + ") + pathHeadUseNode(pathNumber,n)
+						+S(" + ") + pathTailUseNode(pathNumber,n)+ S(" >= ") + S(2-M));
 	}
 
 	//if one edge is used on the path, all 2 nodes on it are also on the path;
@@ -165,7 +183,7 @@ void ILPgen::path(int pathNumber){
 		constraints.push_back(pathUseNode(pathNumber,n1) + S(" - ") + S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" >= ") + S(1 - M));
 	}
 
-	/*//path has no circle
+	//path has no circle
 
 	//for a node not head or tail
 	//flowIn = flowOut + 1
@@ -196,7 +214,7 @@ void ILPgen::path(int pathNumber){
 		constraints.push_back(flowOnNode + S(" - ") + S(M) + S(" ") + pathUseNode(pathNumber,n) + S(" + ") +S(M)+S(" ") + pathHeadUseNode(pathNumber,n)
 				+ S(" + ") + S(M) + S(" ") + pathTailUseNode(pathNumber,n) + S(" >= ") + S(1 - M));
 	}
-*/
+
 }
 
 

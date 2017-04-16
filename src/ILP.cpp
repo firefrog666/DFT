@@ -71,6 +71,8 @@ std::map<std::string,int>	ILP::ILP_solve(const char* argv)
 //	}
 
   try {
+	double timeMax = 1000;
+	double ilpGap = 0.1;
     GRBEnv env = GRBEnv();
     GRBModel model = GRBModel(env, argv);
     //model.getEnv().set(GRB_DoubleParam_IntFeasTol,1e-6);
@@ -94,7 +96,7 @@ std::map<std::string,int>	ILP::ILP_solve(const char* argv)
     	  	string varName = vars[i].get(GRB_StringAttr_VarName);
     	  	results[varName] = vars[i].get(GRB_DoubleAttr_X);
 
-    	 // 	cout << vars[i].get(GRB_StringAttr_VarName) << " " << vars[i].get(GRB_DoubleAttr_X) << endl;
+    	  	cout << vars[i].get(GRB_StringAttr_VarName) << " " << vars[i].get(GRB_DoubleAttr_X) << endl;
 
       }
       ofstream varNames;
@@ -114,7 +116,7 @@ std::map<std::string,int>	ILP::ILP_solve(const char* argv)
           	  	varNames << varName << "\n";
           	  	varResults << varName << "     "<< results[varName] << "\n";
 
-          	  	//cout << vars[i].get(GRB_StringAttr_VarName) << " " << vars[i].get(GRB_DoubleAttr_X) << endl;
+          	  	cout << vars[i].get(GRB_StringAttr_VarName) << " " << vars[i].get(GRB_DoubleAttr_X) << endl;
 
             }
 

@@ -25,7 +25,7 @@ public:
 		x = a; y = b;
 		name = s("n") + s("x")+s(x)+s("y")+s(y);
 		hashValue = algo::hash2Int(a,b);
-		cout << "node " << a << " " << b << " has been created" << endl;
+		cout << "node " << x << " " << y << " has been created" << endl;
 		cout << "node name is" << name << endl;
 	}
 
@@ -122,6 +122,8 @@ public:
 	void initTest(int w, int h);
 	void hashAllEdges();
 	void hashALLNodes();
+	vector<Graph*> splitGraph(int graphNum, int nodesSize);
+	vector<Graph*> splitGraphByWalls(vector<Edge*> walls);
 };
 
 

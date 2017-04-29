@@ -19,7 +19,8 @@ public:
 
 	Graph* g;
 
-	void pathToCoverAllEdges(const char* fileName);
+	void pathToCoverAllEdges(const char* fileName, int pathNumber);
+	void pathCoverSeverEdges(const char* fileName, int pathNumber,vector<Edge*>& edgesToCover);
 	void path(int pathNumber);
 	void addVar(string varName, int varType);
 
@@ -27,6 +28,7 @@ private:
 	vector<string> constraints;
 	vector<string> variables;
 	vector<string> variableTypes;
+	vector<string> bounds;
 	vector<string> obj;
 };
 

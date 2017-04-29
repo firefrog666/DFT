@@ -31,6 +31,9 @@ Node* Graph::getNode(int i, int j){
 }
 
 Edge* Graph::getEdge(Node* start, Node* end){
+	cout << "find Edge"<<" " << start->x<<" " << start->y<<" "<< end->x<<" "<<end->y<<endl;
+	if(start->x == 3 && start->y == 1 && end->x == 3 && end->y == 0)
+		cout << "stop!" << endl;
 	int index = hash2Nodes(start,end);
 	cout<< "finding " <<index <<endl;
 	auto it = hashEdges.find(index);
@@ -85,12 +88,31 @@ Edge::Edge(Node* a, Node* b){
 
 }
 
+
+vector<Graph*> Graph::splitGraphByWalls(vector<Edge*> walls){
+
+}
+
+//find a set of walls to set apart one graph into several graphs
+vector<Graph*> Graph::splitGraph(int graphNum, int nodesSize){
+	//find inner circle
+		//the depth of inner circle
+
+
+	//find walls seperate outer circle
+
+
+}
+
 void Graph::hashAllEdges(){
 	for(Node* node:nodes){
 		auto adjNodes = node->getAdjNodes();
 		for(Node* adjNode: adjNodes){
+			if(node->x == 11 && node->y==0)
+				cout << "stop" << endl;
 			if(!getEdge(adjNode,node)){
 				Edge* edge = new Edge(node,adjNode);
+
 				edges.push_back(edge);
 				hashEdges[edge->hashValue] = edge;
 
@@ -135,40 +157,51 @@ void Graph::initTest(int w, int h){
 	width = w;
 	height = h;
 	//give number to each Node; Hash nodes
-		int id = 0;
+	int id = 0;
 
-		for(int i = 0; i< height; i++){
-			for(int j =0; j < width ; j ++){
-				Node* node = new Node(i,j);
-				nodes.push_back(node);
-				int index = algo::hash2Int(i,j);
-				hashNodes[index] =  node;
-				id ++;
+	for(int i = 0; i< height; i++){
+		for(int j =0; j < width ; j ++){
+			Node* node = new Node(i,j);
+			nodes.push_back(node);
+			int index = algo::hash2Int(i,j);
+			hashNodes[index] =  node;
+			id ++;
 
+		}
+	}
+
+
+
+	//assign joint nodes to each node
+	for(int i = 0; i< height; i++){
+		for(int j =0; j < width; j ++){
+			cout << "im node" << getNode(i,j)->name << endl;
+			if(i>=1){
+				getNode(i,j)->addAdjNodes(getNode(i-1,j));
+				cout << "adj Node:" << getNode(i-1,j)->name<<endl;
+			}
+			if(j>=1){
+				getNode(i,j)->addAdjNodes(getNode(i,j-1));
+				cout << "adj Node:" << getNode(i,j-1)->name<<endl;
+			}
+			if(j<width-1){
+				getNode(i,j)->addAdjNodes(getNode(i,j+1));
+				cout << "adj Node:" << getNode(i,j+1)->name<<endl;
+			}
+			if(i<height-1){
+				getNode(i,j)->addAdjNodes(getNode(i+1,j));
+				cout << "adj Node:" << getNode(i+1,j)->name<<endl;
 			}
 		}
+	}
 
+	hashAllEdges();
 
-
-		//assign joint nodes to each node
-		for(int i = 0; i< height; i++){
-			for(int j =0; j < width; j ++){
-				if(i>=1)
-					getNode(i,j)->addAdjNodes(getNode(i-1,j));
-				if(j>=1)
-					getNode(i,j)->addAdjNodes(getNode(i,j-1));
-				if(j<width-1)
-					getNode(i,j)->addAdjNodes(getNode(i,j+1));
-				if(i<height-1)
-					getNode(i,j)->addAdjNodes(getNode(i+1,j));
-			}
-		}
-
-		hashAllEdges();
-
-		this->entrances.push_back(getNode(0,0));
-		this->exits.push_back(getNode(w-1,h-1));
+	this->entrances.push_back(getNode(0,0));
+	this->exits.push_back(getNode(w-1,h-1));
 
 
 }
+
+
 

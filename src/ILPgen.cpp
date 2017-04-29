@@ -47,10 +47,31 @@ ILPgen::~ILPgen() {
 }
 
 
+void ILPgen::pathCoverSeverEdges(const char* fileName, int pathNumber,vector<Edge*>& edgesToCover){
+	for(int i = 0; i <= pathNumber-1; i++){
+			path(i);
+	}
+
+	//path cover all the edges
+	for(Edge* e:edgesToCover){
+		string edgeUsedOnce = "";
+		for(int i = 0; i <= pathNumber-1; i ++){
+			edgeUsedOnce += S(" + ") + pathUseEdge(i,e);
+		}
+		constraints.push_back(edgeUsedOnce + S(" >= 1"));
+	}
+
+	writeILP ilp;
+	ilp.writeConstraint(constraints,fileName);
+	ilp.writeBounds(bounds,fileName);
+	ilp.writeVarNames(this->variables,this->variableTypes,fileName);
+
+}
+
 //for a graph, write ILPs
 //find paths to cover all the edges
-void ILPgen::pathToCoverAllEdges(const char* fileName){
-	int pathNumber = 4;
+void ILPgen::pathToCoverAllEdges(const char* fileName, int pathNumber){
+
 	for(int i = 0; i <= pathNumber-1; i++){
 		path(i);
 	}
@@ -66,6 +87,7 @@ void ILPgen::pathToCoverAllEdges(const char* fileName){
 
 	writeILP ilp;
 	ilp.writeConstraint(constraints,fileName);
+	ilp.writeBounds(bounds,fileName);
 	ilp.writeVarNames(this->variables,this->variableTypes,fileName);
 }
 
@@ -74,10 +96,16 @@ void ILPgen::pathToCoverAllEdges(const char* fileName){
 //0 for integer, 1 for binary
 void ILPgen::addVar(string variableName, int variableType){
 	variables.push_back(variableName);
-	if(variableType == 0)
+	if(variableType == 0){
 		variableTypes.push_back("0");
-	else
+		bounds.push_back(S(-INTEGERBOUND) + S(" <= ") + variableName + S(" <= ") + S(INTEGERBOUND));
+	}
+	else if(variableType == 1)
 		variableTypes.push_back("1");
+	else if(variableType == 4){
+		variableTypes.push_back("4");
+		bounds.push_back(S(-INTEGERBOUND) + S(" <= ") + variableName + S(" <= ") + S(INTEGERBOUND));
+	}
 }
 
 void ILPgen::path(int pathNumber){
@@ -183,6 +211,14 @@ void ILPgen::path(int pathNumber){
 		constraints.push_back(pathUseNode(pathNumber,n1) + S(" - ") + S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" >= ") + S(1 - M));
 	}
 
+	/*test delete me, path longth = 5
+	string pathLenth = "";
+	for(Edge* e:g->edges){
+		pathLenth += S(" + ") + pathUseEdge(pathNumber,e);
+	}
+	constraints.push_back(pathLenth+ S(" = 8"));
+	//p0Flowex0y0s0t1 = -1constraints.push_back(pathEdgeFlow(pathNumber,g->getEdge(g->getNode(0,0),g->getNode(0,1))) + S(" = -100"));*/
+
 	//path has no circle
 
 	//for a node not head or tail
@@ -190,7 +226,7 @@ void ILPgen::path(int pathNumber){
 
 	//for a not used edge, flow = 0
 	for(Edge* e:g->edges){
-		addVar(pathEdgeFlow(pathNumber,e),0);
+		addVar(pathEdgeFlow(pathNumber,e),4); // 4 means continue
 		constraints.push_back(pathEdgeFlow(pathNumber,e) + S(" - ") + S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" <= 0"));
 		constraints.push_back(pathEdgeFlow(pathNumber,e) + S(" + ") + S(M) + S(" ") + pathUseEdge(pathNumber,e) + S(" >= 0"));
 	}

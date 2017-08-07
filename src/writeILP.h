@@ -29,6 +29,9 @@ public:
 		 //ofstream file;
 		 if(!file.is_open())
 			 file.open(fileName);
+		 if(OBJ.size() == 0)
+			 return;
+
 		 if(OBJ.size() > 0)
 			 file<<OBJ.at(0)<<endl;
 		 //file <<"Maximize"<<endl;
@@ -45,6 +48,10 @@ public:
 			 file.open(fileName);
 		 file<<"Bounds"<<endl;
 
+
+		 if(bounds.size() == 0)
+			 return;
+
 		 for(int i = 0; i<= bounds.size()-1; i++)
 		 {
 			 file<<bounds.at(i)<<endl;
@@ -54,10 +61,11 @@ public:
 	 void writeVarNames(vector<string> varNames,vector<string> varTypes,const char* fileName){
 		if(!file.is_open())
 			file.open(fileName);
-		bool firstIntegerFlag, firstBinaryFlag, firstSemiFlag;
+		bool firstIntegerFlag, firstBinaryFlag, firstSemiFlag,firstContinuesFlag;
 		firstIntegerFlag = false;
 		firstBinaryFlag = false;
 		firstSemiFlag = false;
+		firstContinuesFlag = false;
 		for(int i = 0; i<= varNames.size()-1; i++)
 		{
 			//binary
@@ -105,6 +113,23 @@ public:
 					file<<varNames.at(i)<<endl;
 				}
 			}
+		}
+
+		//continues
+		for(int i = 0; i<= varNames.size()-1; i++)
+		{
+			//Semi
+			/*if(varTypes.at(i) == "4"){
+				if(firstContinuesFlag == false){
+					firstContinuesFlag = true;
+					file<<"semi-continuous"<<endl;
+					file<<varNames.at(i)<<endl;
+				}
+				else
+				{
+					file<<varNames.at(i)<<endl;
+				}
+			}*/
 		}
 
 

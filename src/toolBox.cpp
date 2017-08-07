@@ -9,6 +9,12 @@ string s(int i){
 	ss<<i;
 	return ss.str();
 }
+
+string s(float i){
+	stringstream ss;
+	ss<<i;
+	return ss.str();
+}
 string s(const char* s){
 	stringstream ss;
 	ss<<s;
@@ -21,6 +27,11 @@ string s(string s){
 }
 
 string S(int i){
+	stringstream ss;
+	ss<<i;
+	return ss.str();
+}
+string S(float i){
 	stringstream ss;
 	ss<<i;
 	return ss.str();

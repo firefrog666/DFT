@@ -15,7 +15,7 @@ public:
 	virtual ~ILP();
 
 public:
-static	std::map<std::string,int>	ILP_solve(const char* argv);
+static	std::map<std::string,float>	ILP_solve(const char* argv);
 };
 
 #endif /* ILP_H_ */

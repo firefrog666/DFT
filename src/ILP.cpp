@@ -59,10 +59,10 @@ void setTime(double i){
 	timeMax = i;
 }*/
 
-std::map<std::string,int>	ILP::ILP_solve(const char* argv)
+std::map<std::string,float>	ILP::ILP_solve(const char* argv)
 {
 
-	map<string, int > results;
+	map<string,float> results;
 	GRBVar* vars = 0;
 
 //	if (argc < 2) {
@@ -71,8 +71,8 @@ std::map<std::string,int>	ILP::ILP_solve(const char* argv)
 //	}
 
   try {
-	double timeMax = 1000;
-	double ilpGap = 0.1;
+	double timeMax = 10800;
+	double ilpGap = 1.0;
     GRBEnv env = GRBEnv();
     GRBModel model = GRBModel(env, argv);
     //model.getEnv().set(GRB_DoubleParam_IntFeasTol,1e-6);
@@ -88,6 +88,10 @@ std::map<std::string,int>	ILP::ILP_solve(const char* argv)
       model.optimize();
       optimstatus = model.get(GRB_IntAttr_Status);
     }
+    //ofstream varNames;
+    ofstream varResults;
+   // varNames.open("varName.txt");
+    varResults.open("varResults.txt");
 
     if (optimstatus == GRB_OPTIMAL) {
       double objval = model.get(GRB_DoubleAttr_ObjVal);
@@ -95,33 +99,13 @@ std::map<std::string,int>	ILP::ILP_solve(const char* argv)
       for(int i =0; i<model.get(GRB_IntAttr_NumVars);i++){
     	  	string varName = vars[i].get(GRB_StringAttr_VarName);
     	  	results[varName] = vars[i].get(GRB_DoubleAttr_X);
-
-    	  	cout << vars[i].get(GRB_StringAttr_VarName) << " " << vars[i].get(GRB_DoubleAttr_X) << endl;
+    		varResults << varName << "     "<< results[varName] << "\n";
+    	  	//cout << vars[i].get(GRB_StringAttr_VarName) << " " << vars[i].get(GRB_DoubleAttr_X) << endl;
 
       }
-      ofstream varNames;
-      ofstream varResults;
-      varNames.open("varName.txt");
-      varResults.open("varResults.txt");
 
+      //important! when deal with integer, +0.5 may make it round
 
-      for(int i =0; i<model.get(GRB_IntAttr_NumVars);i++){
-          	  	string varName = vars[i].get(GRB_StringAttr_VarName);
-          	  	results[varName] = vars[i].get(GRB_DoubleAttr_X)+0.5; // +0.5 to make sure its round
-
-          	  if(varName == "co2o3storagey3" ){
-          	  				cout << "gotte ya" <<endl;
-          	  }
-
-          	  	varNames << varName << "\n";
-          	  	varResults << varName << "     "<< results[varName] << "\n";
-
-          	  	cout << vars[i].get(GRB_StringAttr_VarName) << " " << vars[i].get(GRB_DoubleAttr_X) << endl;
-
-            }
-
-      varNames.close();
-      varResults.close();
 
       cout << "size of results is " << sizeof(results)*results.size()<< endl;
     /*  cout << "using mapSize function, size is " << mapSize(results)<<endl;
@@ -147,32 +131,11 @@ std::map<std::string,int>	ILP::ILP_solve(const char* argv)
          	  	string varName = vars[i].get(GRB_StringAttr_VarName);
          	  	results[varName] = vars[i].get(GRB_DoubleAttr_X);
 
-         	 // 	cout << vars[i].get(GRB_StringAttr_VarName) << " " << vars[i].get(GRB_DoubleAttr_X) << endl;
-
+         	  	//cout << vars[i].get(GRB_StringAttr_VarName) << " " << vars[i].get(GRB_DoubleAttr_X) << endl;
+         	  	varResults << varName << "     "<< results[varName] << "\n";
            }
-           ofstream varNames;
-           ofstream varResults;
-           varNames.open("varName.txt");
-           varResults.open("varResults.txt");
 
 
-           for(int i =0; i<model.get(GRB_IntAttr_NumVars);i++){
-               	  	string varName = vars[i].get(GRB_StringAttr_VarName);
-               	  	results[varName] = vars[i].get(GRB_DoubleAttr_X)+0.5; // +0.5 to make sure its round
-
-               	  if(varName == "co2o3storagey3" ){
-               	  				cout << "gotte ya" <<endl;
-               	  }
-
-               	  	varNames << varName << "\n";
-               	  	varResults << varName << "     "<< results[varName] << "\n";
-
-               	  	cout << vars[i].get(GRB_StringAttr_VarName) << " " << vars[i].get(GRB_DoubleAttr_X) << endl;
-
-                 }
-
-           varNames.close();
-           varResults.close();
     }
 
   } catch(GRBException e) {

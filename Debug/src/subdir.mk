@@ -7,6 +7,7 @@ CPP_SRCS += \
 ../src/Graph.cpp \
 ../src/ILP.cpp \
 ../src/ILPgen.cpp \
+../src/chip.cpp \
 ../src/dateJournal_goodluck.cpp \
 ../src/testbench.cpp \
 ../src/toolBox.cpp \
@@ -16,6 +17,7 @@ OBJS += \
 ./src/Graph.o \
 ./src/ILP.o \
 ./src/ILPgen.o \
+./src/chip.o \
 ./src/dateJournal_goodluck.o \
 ./src/testbench.o \
 ./src/toolBox.o \
@@ -25,6 +27,7 @@ CPP_DEPS += \
 ./src/Graph.d \
 ./src/ILP.d \
 ./src/ILPgen.d \
+./src/chip.d \
 ./src/dateJournal_goodluck.d \
 ./src/testbench.d \
 ./src/toolBox.d \

@@ -36,6 +36,8 @@ public:
 			return false;
 	}
 };
+
+
 class Node{
 public:
 	Node(){
@@ -65,7 +67,7 @@ public:
 	float x,y;
 	float hashValue;
 	string name;
-private:
+	bool isBusy = false; //ocupied by some task
 	vector<Node*>* adjNodes = new vector<Node*>();
 	vector<Edge*>* adjEdges = new vector<Edge*>();
 
@@ -91,6 +93,12 @@ public:
 
 	vector<Edge*>* getAdjEdges(){
 		return adjEdges;
+	}
+	bool sameNode(Node* otherN){
+		if(otherN->hashValue == hashValue)
+			return true;
+		else
+			return false;
 	}
 
 
@@ -119,17 +127,37 @@ public:
 		sa0 = e->sa0;
 		sa1 = e->sa1;
 	}
-	vector<Node*>* adjNodes = new vector<Node*>();
-	vector<Edge*>* adjEdges = new vector<Edge*>();
+	Edge(int ex,int ey, int es, int et){
+		x = ex;
+		y = ey;
+		s = es;
+		t = et;
+		hashValue = algo::hash4Int(x,y,s,t);
+		setName();
+
+		//cout<<"edge "<< x << " "<< y <<" "<<s<<" "<<t<<" "<< "has been created"<< endl;
+		//cout<<"hashValue is "<<hashValue<<endl;
+		//cout <<"edge name = "<<name<<endl;
+		isWall = false;
+		isHole = false;
+		isStore = false;
+		isOn = true;
+		sa0 = false;
+		sa1 = false;
+	}
+	//vector<Node*>* adjNodes = new vector<Node*>();
+	//vector<Edge*>* adjEdges = new vector<Edge*>();
 	float x,y,s,t;
 	float hashValue;
 	string name;
 	bool isWall = false;
 	bool isHole = false;
+	bool isStore = true;
 	bool isOn = false;
 	bool sa0 = false;
 	bool sa1 = false;
-
+	int id;
+	bool isBusy = false;
 
 public:
 	void setName(){
@@ -138,9 +166,20 @@ public:
 	void turnOn();
 
 	void turnOff();
+	void cpySpecFrom(E e){
+		isWall = e->isWall;
+		isHole = e->isHole;
+		isOn = e->isOn;
+		sa0 = e->sa0;
+		sa1 = e->sa1;
+		id = e->id;
+	}
 
 	bool isGood(){ return !sa0 && !sa1;};
 	bool intercectEdge(Edge* e){
+
+
+/*
 		if(x > e->x && s > e->x && x >e->s && s > e->s )
 			return false;
 		if(x < e->x && s < e->x && x <e->s && s < e->s )
@@ -148,9 +187,14 @@ public:
 		if(y > e->y && t > e->y && y >e->t && t > e->t )
 			return false;
 		if(y < e->y && t < e->y && y <e->t && t < e->t )
-			return false;
+			return false;*/
 
-		return true;
+		P p0(x,y);
+		P p1(s,t);
+		P p2(e->x,e->y);
+		P p3(e->s,e->t);
+
+		return algo::seg(p0,p1,p2,p3);
 
 
 	}
@@ -170,17 +214,11 @@ public:
 			return false;
 		}
 	}
-	void setAdjNodes(vector<Node*>& nodes){
-		adjNodes = &nodes;
-	}
 
-	void addAdjNodes(Node* node){
-		adjNodes->push_back(node);
-	}
 
-	vector<Node*>*  getAdjNodes(){
-		return adjNodes;
-	}
+
+
+
 
 	/*vector<Edge*>* getAdjEdges(){
 		return adjEdges;
@@ -193,9 +231,16 @@ public:
 	Graph();
 	Graph(const char* csvFile);
 	Graph(vector<Node*> nodes,Graph* otherG);
-	void creatNodes(const char* cvvFile);
+	void creatNodes(const char* xml);
+	void creatEdges(const char* );
+	void creatEdgePair(const char* xml);
 	void creatCells(const char* cvvFile);
 	void creatSuperCell(const char* cvvFile);
+	V<V<E>> locateWalls();
+	V<V<E>> locateHoles();
+	void deleteHoles(V<V<E>> setOfWalls);
+	void deleteWalls(V<V<E>> setOfWalls);
+	void sortEdgesAndNodes();
 	virtual ~Graph();
 	int width,height;
 public:
@@ -203,84 +248,71 @@ public:
 	map<float,Node*> hashNodes;
 	vector<Edge*> edges;
 	vector<Node*> nodes;
+
+	vector<Edge*> oldEdges;
+	vector<Node*> oldNodes;
+	map<E,E> newEdgeToOldEde;
 	vector<Node*> entrances;
 	vector<Node*> exits;
 	vector<Cell*> cells;
 	Cell* superCell;
 
 	map<Node*,vector<Node*>> superNodeToVents;
-
+	V<E> edgePair1; //edgePair cannot be together
+	V<E> edgePair2; //edgePair cannot be together
 	V<E> insideEdges;
 	V<E> brinkEdges;
 
-private:
-	void getHashEdges();
-	vector<Node*> outSideWalk(Node* initNode);
-	bool nodeOnTheBrink(Node* node);
-	bool edgeOnBrink(Edge* e,vector<Cell*> cells);
-	vector<Node*> outSideWalk(Node* initNode, int steps);
-	void breadSearchPath(vector<Node*>& path, vector<vector<Node*>> alltheGraphs);
-	Edge* pathShareSameEdge(vector<Edge*>* p1, vector<Edge*>* p2);
-	vector<Node*> getHoleNodes(Node* seed);
-	Node* getLeftCorner();
+	V<V<E>> sToWEdges;
+	V<V<E>> wToWEdges;
 
 public:
+	void getHashEdges();
+	Node* getLeftCorner();
 	Edge* getEdge(Node* start, Node* end);
 	Edge* getEdge(float x,float y,float s,float t);
 	Node* getNode(float i, float j);
+	Node* getNodeById(int id);
+	V<E> getAdjEdges(E e);
+	E getEdgeById(int id);
 	bool nodeOnEdge(Node* n, Edge* e);
 	bool edgeOnEdge(Edge* e0, Edge* e1);
 	static float hash2Nodes(Node* a, Node* b);
 	void initTest(int w, int h);
 	void hashAllEdges();
 	void hashALLNodes();
-	void removeEdge(Edge* e);
-	void removeNode(Node* n);
-	vector<Graph*> splitGraph(int graphNum, unsigned int nodesSize);
-	void cutOffSubGraph(Graph* subGraph);
-	Graph* splitGraphByBoundingBox(float ld_x, float ld_y, float ru_x,float ru_y );
-	V<Graph*> splitGraphByAxis(vector<float> xAxis,vector<float> yAxis);
-	vector<Edge*> connectPaths(vector<Edge*> path1, vector<Edge*> path2);
-	vector<Edge*> getWallsBetweenSubGrapsh(vector<Graph*>* subGraphs);
-	vector<vector<Edge*>*> connectPaths(vector<vector<Edge*>*>& p1Set, vector<vector<Edge*>*>& p2Set);
-	vector<Cell*> getCells();
-	Cell* getSuperCell(V<Cell*> cells);
-	vector<Node*> outSideNodes();
-	Graph* fromGraphToChip();
+
 	bool  dfs(Node* s, Node* t);
 	void sortEdgesInPath(vector<Edge*>* pathToSort);
 	PATHN edgesToNodes(const vector<Edge*>* sortedPath);
 	PATHE pathNodesToEdges(vector<Node*> sortedNodes);
-	V<PATHE> getPathsFromEdges(vector<Edge*> edgeSet);
-	V<PATHE> getRingsFromEdges(vector<Edge*> edgeSet);
-	V<PATHE> getGroupsFromEdges(vector<Edge*> edgeSet);
-	bool nodeInsideRing(Node* n,vector<Edge*> ring);
-	PATHN  getNodesOnRing(vector<Edge*> ring);
-	vector<Node*>  getNodesInRing(vector<Edge*> ring);
-	vector<Node*>  getNodesOutRing(vector<Edge*> ring);
-	V<V<PATHE>> connectRings(PATHE ringS,PATHE ringT,vector<vector<Edge*>> rings);
 
-
-	map<Node*,int> ringToOtherRings(vector<Edge*> ring,vector<vector<Edge*>> allRings);
-
-	vector<Node*> getNodesInOrOnAllRings(vector<vector<Edge*>> allRings);
-	vector<Node*> getNodesOutAllRings(vector<vector<Edge*>> allRings);
-
-	V<PATHE> fromStepToPath(map<Node*,int>step, Node* start, V<N> disabledNodes);
-	V<PATHE> fromStepToShortedPath(map<N,int>steps, V<N> starts,V<N> disabledNodes);
-	V<PATHE> ringToRingPaths(PATHE ring0, PATHE ring1, V<PATHE> allRings); //ring to ring shortestpats
-	map<pair<PATHE,PATHE>,V<PATHE>> allRingShortPaths(V<PATHE> rings);
-	V<PATHE> selectshortPaths(PATHE ring0, PATHE ring1, map<pair<PATHE,PATHE>,V<PATHE>> ringToRingShortedPaths);
 	bool pathIntercectPaths(PATHE p, V<PATHE> paths);
 	bool pathIntercectPath(PATHE p0, PATHE p1);
 	void moveGraph(float x, float y);
-
-	void connectLoopToPath(V<E>& loop, V<E>& path);
-	V<N> nodesOnPath(const V<E>& path);
-	V<E> shortestPathToNodes(N start, V<N> destinations, V<N> forbiddenNodes);
-	V<N> traverseSortedPath(N start, N end, const V<E>& sortedPath);
+	V<E> findPath(N start, N end, V<N> forbideNodes, V<E> forbidEdges);
+	bool dfs(Node* s, Node* t, V<E>& path, V<E>& fobidEdges, V<N>& fobidNodes);
+	bool dfsValveSharing(Node* s, Node* t, V<E>& path, V<E>& forbidEdges,V<N>& forbidNodes,map<E,E> shareValveMap);
 
 
+
+
+	void removeNode(Node * n);
+	void removeEdge(Edge* e);
+	void replaceNode(N target,N newNode);
+	bool addEdge(E e);
+	bool addNode(N n);
+	bool addEdges(V<E> edgesToAdd);
+
+	bool edgesConnected(E e0, E e1);
+	Graph* fitGraphIntoGrid();
+	void findBoundingBox(V<float>& boundingbox);
+	void initByBoundingBox(V<float>& boundingBox);
+
+	void howShareVavles(V<V<E>>& paths, V<V<E>>& cuts, V<E>& newEdges, V<E>& sharePlans);
+	bool validPathWithShareValves(const V<E>& path,const V<E>& newEdges, V<E>& sharePlan);
+	bool validCutWithShareValves(const V<E>& path, const V<E>& newEdges, V<E>& sharePlan);
+    bool howShareValvesMostLikeOTherPlan(const V<V<E>>& paths,const V<V<E>>& cuts,const V<E>& newEdges,V<E>& sharePlan, const V<E>& otherNewEdges,const V<E>& otherSharePlan);
 
 };
 

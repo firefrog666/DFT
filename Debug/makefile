@@ -38,19 +38,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: dateJournal_goodluck
+all: DFT
 
 # Tool invocations
-dateJournal_goodluck: $(OBJS) $(USER_OBJS)
+DFT: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L/home/ga63quk/workspace/gurobi605/linux64/lib/ -o "dateJournal_goodluck" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L/home/ga63quk/workspace/gurobi751/linux64/lib/ -o "DFT" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(C_UPPER_DEPS)$(CXX_DEPS)$(OBJS)$(CPP_DEPS)$(C_DEPS) dateJournal_goodluck
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(C_UPPER_DEPS)$(CXX_DEPS)$(OBJS)$(CPP_DEPS)$(C_DEPS) DFT
 	-@echo ' '
 
 .PHONY: all clean dependents

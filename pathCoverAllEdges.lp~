@@ -1,60 +1,156 @@
+max
+ + p0Useex0y0s2t0 + p0Useex0y0s0t1 + p0Useex0y1s0t2 + p0Useex0y2s2t2
 SUBJECT TO
-p0Flowex0y0s1t0 + 10000 p0Useex0y0s1t0 <= 10000
-p0Flowex0y0s1t0 - 10000 p0Useex0y0s1t0 >= -10000
-p0Flowex0y0s0t1 + 10000 p0Useex0y0s0t1 <= 10000
-p0Flowex0y0s0t1 - 10000 p0Useex0y0s0t1 >= -10000
-p0Flowex0y1s1t1 + 10000 p0Useex0y1s1t1 <= 10000
-p0Flowex0y1s1t1 - 10000 p0Useex0y1s1t1 >= -10000
-p0Flowex1y0s1t1 + 10000 p0Useex1y0s1t1 <= 10000
-p0Flowex1y0s1t1 - 10000 p0Useex1y0s1t1 >= -10000
+
+p0nx0y0reachnx0y0 = 1
+p0nx0y0reachnx1y1 = 0
+p0nx0y0reachnx0y0 - p0nx0y0reachnx2y0 - 10000 p0Useex0y0s2t0 <= 0
+p0nx0y0reachnx0y0 - p0nx0y0reachnx2y0 + 10000 p0Useex0y0s2t0 >= 0
+p0nx0y0reachnx0y0 + p0nx0y0reachnx2y0 - 10000 p0Useex0y0s2t0 >= -9999
+p0nx0y0reachnx0y0 + p0nx0y0reachnx2y0 + 10000 p0Useex0y0s2t0 <= 10001
+p0nx0y0reachnx0y0 - p0nx0y0reachnx0y1 - 10000 p0Useex0y0s0t1 <= 0
+p0nx0y0reachnx0y0 - p0nx0y0reachnx0y1 + 10000 p0Useex0y0s0t1 >= 0
+p0nx0y0reachnx0y0 + p0nx0y0reachnx0y1 - 10000 p0Useex0y0s0t1 >= -9999
+p0nx0y0reachnx0y0 + p0nx0y0reachnx0y1 + 10000 p0Useex0y0s0t1 <= 10001
+p0nx0y0reachnx2y0 - p0nx0y0reachnx2y2 - 10000 p0Useex2y0s2t2 <= 0
+p0nx0y0reachnx2y0 - p0nx0y0reachnx2y2 + 10000 p0Useex2y0s2t2 >= 0
+p0nx0y0reachnx2y0 + p0nx0y0reachnx2y2 - 10000 p0Useex2y0s2t2 >= -9999
+p0nx0y0reachnx2y0 + p0nx0y0reachnx2y2 + 10000 p0Useex2y0s2t2 <= 10001
+p0nx0y0reachnx0y1 - p0nx0y0reachnx1y1 - 10000 p0Useex0y1s1t1 <= 0
+p0nx0y0reachnx0y1 - p0nx0y0reachnx1y1 + 10000 p0Useex0y1s1t1 >= 0
+p0nx0y0reachnx0y1 + p0nx0y0reachnx1y1 - 10000 p0Useex0y1s1t1 >= -9999
+p0nx0y0reachnx0y1 + p0nx0y0reachnx1y1 + 10000 p0Useex0y1s1t1 <= 10001
+p0nx0y0reachnx0y1 - p0nx0y0reachnx0y2 - 10000 p0Useex0y1s0t2 <= 0
+p0nx0y0reachnx0y1 - p0nx0y0reachnx0y2 + 10000 p0Useex0y1s0t2 >= 0
+p0nx0y0reachnx0y1 + p0nx0y0reachnx0y2 - 10000 p0Useex0y1s0t2 >= -9999
+p0nx0y0reachnx0y1 + p0nx0y0reachnx0y2 + 10000 p0Useex0y1s0t2 <= 10001
+p0nx0y0reachnx0y2 - p0nx0y0reachnx2y2 - 10000 p0Useex0y2s2t2 <= 0
+p0nx0y0reachnx0y2 - p0nx0y0reachnx2y2 + 10000 p0Useex0y2s2t2 >= 0
+p0nx0y0reachnx0y2 + p0nx0y0reachnx2y2 - 10000 p0Useex0y2s2t2 >= -9999
+p0nx0y0reachnx0y2 + p0nx0y0reachnx2y2 + 10000 p0Useex0y2s2t2 <= 10001
+p0Flowex0y0s2t0nx0y0 + 10000 p0Useex0y0s2t0 <= 10000
+p0Flowex0y0s2t0nx0y0 - 10000 p0Useex0y0s2t0 >= -10000
+p0Flowex0y0s0t1nx0y0 + 10000 p0Useex0y0s0t1 <= 10000
+p0Flowex0y0s0t1nx0y0 - 10000 p0Useex0y0s0t1 >= -10000
+p0Flowex2y0s2t2nx0y0 + 10000 p0Useex2y0s2t2 <= 10000
+p0Flowex2y0s2t2nx0y0 - 10000 p0Useex2y0s2t2 >= -10000
+p0Flowex0y1s1t1nx0y0 + 10000 p0Useex0y1s1t1 <= 10000
+p0Flowex0y1s1t1nx0y0 - 10000 p0Useex0y1s1t1 >= -10000
+p0Flowex0y1s0t2nx0y0 + 10000 p0Useex0y1s0t2 <= 10000
+p0Flowex0y1s0t2nx0y0 - 10000 p0Useex0y1s0t2 >= -10000
+p0Flowex0y2s2t2nx0y0 + 10000 p0Useex0y2s2t2 <= 10000
+p0Flowex0y2s2t2nx0y0 - 10000 p0Useex0y2s2t2 >= -10000
+ - p0Flowex0y0s2t0nx0y0 - p0Flowex0y0s0t1nx0y0 + p0nx0y0SuperFlownx0y0 - p0nx0y0Conservenx0y0 = 0
+p0nx2y0SuperFlownx0y0 = 0
+ + p0Flowex0y0s2t0nx0y0 - p0Flowex2y0s2t2nx0y0 + p0nx2y0SuperFlownx0y0 - p0nx2y0Conservenx0y0 = 0
+p0nx0y1SuperFlownx0y0 = 0
+ + p0Flowex0y0s0t1nx0y0 - p0Flowex0y1s1t1nx0y0 - p0Flowex0y1s0t2nx0y0 + p0nx0y1SuperFlownx0y0 - p0nx0y1Conservenx0y0 = 0
+p0nx1y1SuperFlownx0y0 = 0
+ + p0Flowex0y1s1t1nx0y0 + p0nx1y1SuperFlownx0y0 - p0nx1y1Conservenx0y0 = 0
+p0nx0y2SuperFlownx0y0 = 0
+ + p0Flowex0y1s0t2nx0y0 - p0Flowex0y2s2t2nx0y0 + p0nx0y2SuperFlownx0y0 - p0nx0y2Conservenx0y0 = 0
+p0nx2y2SuperFlownx0y0 = 0
+ + p0Flowex2y0s2t2nx0y0 + p0Flowex0y2s2t2nx0y0 + p0nx2y2SuperFlownx0y0 - p0nx2y2Conservenx0y0 = 0
+p0nx0y0Conservenx0y0 + p0nx2y0Conservenx0y0 + 10000 p0Useex0y0s2t0 <= 10001
+p0nx0y0Conservenx0y0 + p0nx2y0Conservenx0y0 - 10000 p0Useex0y0s2t0 >= -9999
+p0nx0y0Conservenx0y0 - p0nx2y0Conservenx0y0 - 10000 p0Useex0y0s2t0 <= 0
+p0nx0y0Conservenx0y0 - p0nx2y0Conservenx0y0 + 10000 p0Useex0y0s2t0 >= 0
+p0nx0y0Conservenx0y0 + p0nx0y1Conservenx0y0 + 10000 p0Useex0y0s0t1 <= 10001
+p0nx0y0Conservenx0y0 + p0nx0y1Conservenx0y0 - 10000 p0Useex0y0s0t1 >= -9999
+p0nx0y0Conservenx0y0 - p0nx0y1Conservenx0y0 - 10000 p0Useex0y0s0t1 <= 0
+p0nx0y0Conservenx0y0 - p0nx0y1Conservenx0y0 + 10000 p0Useex0y0s0t1 >= 0
+p0nx2y0Conservenx0y0 + p0nx2y2Conservenx0y0 + 10000 p0Useex2y0s2t2 <= 10001
+p0nx2y0Conservenx0y0 + p0nx2y2Conservenx0y0 - 10000 p0Useex2y0s2t2 >= -9999
+p0nx2y0Conservenx0y0 - p0nx2y2Conservenx0y0 - 10000 p0Useex2y0s2t2 <= 0
+p0nx2y0Conservenx0y0 - p0nx2y2Conservenx0y0 + 10000 p0Useex2y0s2t2 >= 0
+p0nx0y1Conservenx0y0 + p0nx1y1Conservenx0y0 + 10000 p0Useex0y1s1t1 <= 10001
+p0nx0y1Conservenx0y0 + p0nx1y1Conservenx0y0 - 10000 p0Useex0y1s1t1 >= -9999
+p0nx0y1Conservenx0y0 - p0nx1y1Conservenx0y0 - 10000 p0Useex0y1s1t1 <= 0
+p0nx0y1Conservenx0y0 - p0nx1y1Conservenx0y0 + 10000 p0Useex0y1s1t1 >= 0
+p0nx0y1Conservenx0y0 + p0nx0y2Conservenx0y0 + 10000 p0Useex0y1s0t2 <= 10001
+p0nx0y1Conservenx0y0 + p0nx0y2Conservenx0y0 - 10000 p0Useex0y1s0t2 >= -9999
+p0nx0y1Conservenx0y0 - p0nx0y2Conservenx0y0 - 10000 p0Useex0y1s0t2 <= 0
+p0nx0y1Conservenx0y0 - p0nx0y2Conservenx0y0 + 10000 p0Useex0y1s0t2 >= 0
+p0nx0y2Conservenx0y0 + p0nx2y2Conservenx0y0 + 10000 p0Useex0y2s2t2 <= 10001
+p0nx0y2Conservenx0y0 + p0nx2y2Conservenx0y0 - 10000 p0Useex0y2s2t2 >= -9999
+p0nx0y2Conservenx0y0 - p0nx2y2Conservenx0y0 - 10000 p0Useex0y2s2t2 <= 0
+p0nx0y2Conservenx0y0 - p0nx2y2Conservenx0y0 + 10000 p0Useex0y2s2t2 >= 0
 p0nx0y0SuperFlownx1y1 = 0
- - p0Flowex0y0s1t0nx1y1 - p0Flowex0y0s0t1nx1y1 + p0nx0y0SuperFlownx1y1 - p0nx0y0Conservenx1y1 = 0
-p0nx0y0Conservenx1y1 + p0nx1y0Conservenx1y1 + 10000 p0Useex0y0s1t0 <= 10001
-p0nx0y0Conservenx1y1 + p0nx1y0Conservenx1y1 - 10000 p0Useex0y0s1t0 >= -9999
-p0nx0y0Conservenx1y1 - p0nx1y0Conservenx1y1 - 10000 p0Useex0y0s1t0 <= 0
-p0nx0y0Conservenx1y1 - p0nx1y0Conservenx1y1 + 10000 p0Useex0y0s1t0 >= 0
-
-p0nx0y0Conservenx1y1 - p0nx1y1reachnx0y0 = 0
+ - p0Flowex0y0s2t0nx1y1 - p0Flowex0y0s0t1nx1y1 + p0nx0y0SuperFlownx1y1 - p0nx0y0Conservenx1y1 = 0
+p0nx2y0SuperFlownx1y1 = 0
+ + p0Flowex0y0s2t0nx1y1 - p0Flowex2y0s2t2nx1y1 + p0nx2y0SuperFlownx1y1 - p0nx2y0Conservenx1y1 = 0
 p0nx0y1SuperFlownx1y1 = 0
- + p0Flowex0y0s0t1nx1y1 - p0Flowex0y1s1t1nx1y1 + p0nx0y1SuperFlownx1y1 - p0nx0y1Conservenx1y1 = 0
-p0nx0y1Conservenx1y1 + p0nx0y0Conservenx1y1 + 10000 p0Useex0y0s0t1 <= 10001
-p0nx0y1Conservenx1y1 + p0nx0y0Conservenx1y1 - 10000 p0Useex0y0s0t1 >= -9999
-p0nx0y1Conservenx1y1 - p0nx0y0Conservenx1y1 - 10000 p0Useex0y0s0t1 <= 0
-p0nx0y1Conservenx1y1 - p0nx0y0Conservenx1y1 + 10000 p0Useex0y0s0t1 >= 0
-
-
-p0nx1y0SuperFlownx1y1 = 0
- + p0Flowex0y0s1t0nx1y1 - p0Flowex1y0s1t1nx1y1 + p0nx1y0SuperFlownx1y1 - p0nx1y0Conservenx1y1 = 0
-
-p0nx1y0Conservenx1y1 + p0nx1y1Conservenx1y1 + 10000 p0Useex1y0s1t1 <= 10001
-p0nx1y0Conservenx1y1 + p0nx1y1Conservenx1y1 - 10000 p0Useex1y0s1t1 >= -9999
-p0nx1y0Conservenx1y1 - p0nx1y1Conservenx1y1 - 10000 p0Useex1y0s1t1 <= 0
-p0nx1y0Conservenx1y1 - p0nx1y1Conservenx1y1 + 10000 p0Useex1y0s1t1 >= 0
-
- + p0Flowex0y1s1t1nx1y1 + p0Flowex1y0s1t1nx1y1 + p0nx1y1SuperFlownx1y1 - p0nx1y1Conservenx1y1 = 0
-p0nx1y1Conservenx1y1 + p0nx0y1Conservenx1y1 + 10000 p0Useex0y1s1t1 <= 10001
-p0nx1y1Conservenx1y1 + p0nx0y1Conservenx1y1 - 10000 p0Useex0y1s1t1 >= -9999
-p0nx1y1Conservenx1y1 - p0nx0y1Conservenx1y1 - 10000 p0Useex0y1s1t1 <= 0
-p0nx1y1Conservenx1y1 - p0nx0y1Conservenx1y1 + 10000 p0Useex0y1s1t1 >= 0
-
-p0Useex0y0s1t0 = 1
+ + p0Flowex0y0s0t1nx1y1 - p0Flowex0y1s1t1nx1y1 - p0Flowex0y1s0t2nx1y1 + p0nx0y1SuperFlownx1y1 - p0nx0y1Conservenx1y1 = 0
+ + p0Flowex0y1s1t1nx1y1 + p0nx1y1SuperFlownx1y1 - p0nx1y1Conservenx1y1 = 0
+p0nx0y2SuperFlownx1y1 = 0
+ + p0Flowex0y1s0t2nx1y1 - p0Flowex0y2s2t2nx1y1 + p0nx0y2SuperFlownx1y1 - p0nx0y2Conservenx1y1 = 0
+p0nx2y2SuperFlownx1y1 = 0
+ + p0Flowex2y0s2t2nx1y1 + p0Flowex0y2s2t2nx1y1 + p0nx2y2SuperFlownx1y1 - p0nx2y2Conservenx1y1 = 0
+p0nx0y0Conservenx1y1 + p0nx2y0Conservenx1y1 + 10000 p0Useex0y0s2t0 <= 10001
+p0nx0y0Conservenx1y1 + p0nx2y0Conservenx1y1 - 10000 p0Useex0y0s2t0 >= -9999
+p0nx0y0Conservenx1y1 - p0nx2y0Conservenx1y1 - 10000 p0Useex0y0s2t0 <= 0
+p0nx0y0Conservenx1y1 - p0nx2y0Conservenx1y1 + 10000 p0Useex0y0s2t0 >= 0
+p0nx0y0Conservenx1y1 + p0nx0y1Conservenx1y1 + 10000 p0Useex0y0s0t1 <= 10001
+p0nx0y0Conservenx1y1 + p0nx0y1Conservenx1y1 - 10000 p0Useex0y0s0t1 >= -9999
+p0nx0y0Conservenx1y1 - p0nx0y1Conservenx1y1 - 10000 p0Useex0y0s0t1 <= 0
+p0nx0y0Conservenx1y1 - p0nx0y1Conservenx1y1 + 10000 p0Useex0y0s0t1 >= 0
+p0nx2y0Conservenx1y1 + p0nx2y2Conservenx1y1 + 10000 p0Useex2y0s2t2 <= 10001
+p0nx2y0Conservenx1y1 + p0nx2y2Conservenx1y1 - 10000 p0Useex2y0s2t2 >= -9999
+p0nx2y0Conservenx1y1 - p0nx2y2Conservenx1y1 - 10000 p0Useex2y0s2t2 <= 0
+p0nx2y0Conservenx1y1 - p0nx2y2Conservenx1y1 + 10000 p0Useex2y0s2t2 >= 0
+p0nx0y1Conservenx1y1 + p0nx1y1Conservenx1y1 + 10000 p0Useex0y1s1t1 <= 10001
+p0nx0y1Conservenx1y1 + p0nx1y1Conservenx1y1 - 10000 p0Useex0y1s1t1 >= -9999
+p0nx0y1Conservenx1y1 - p0nx1y1Conservenx1y1 - 10000 p0Useex0y1s1t1 <= 0
+p0nx0y1Conservenx1y1 - p0nx1y1Conservenx1y1 + 10000 p0Useex0y1s1t1 >= 0
+p0nx0y1Conservenx1y1 + p0nx0y2Conservenx1y1 + 10000 p0Useex0y1s0t2 <= 10001
+p0nx0y1Conservenx1y1 + p0nx0y2Conservenx1y1 - 10000 p0Useex0y1s0t2 >= -9999
+p0nx0y1Conservenx1y1 - p0nx0y2Conservenx1y1 - 10000 p0Useex0y1s0t2 <= 0
+p0nx0y1Conservenx1y1 - p0nx0y2Conservenx1y1 + 10000 p0Useex0y1s0t2 >= 0
+p0nx0y2Conservenx1y1 + p0nx2y2Conservenx1y1 + 10000 p0Useex0y2s2t2 <= 10001
+p0nx0y2Conservenx1y1 + p0nx2y2Conservenx1y1 - 10000 p0Useex0y2s2t2 >= -9999
+p0nx0y2Conservenx1y1 - p0nx2y2Conservenx1y1 - 10000 p0Useex0y2s2t2 <= 0
+p0nx0y2Conservenx1y1 - p0nx2y2Conservenx1y1 + 10000 p0Useex0y2s2t2 >= 0
 Bounds
--100 <= p0Flowex0y0s1t0 <= 100
--100 <= p0Flowex0y0s0t1 <= 100
--100 <= p0Flowex0y1s1t1 <= 100
--100 <= p0Flowex1y0s1t1 <= 100
+-100 <= p0Flowex0y0s2t0nx0y0 <= 100
+-100 <= p0Flowex0y0s0t1nx0y0 <= 100
+-100 <= p0Flowex2y0s2t2nx0y0 <= 100
+-100 <= p0Flowex0y1s1t1nx0y0 <= 100
+-100 <= p0Flowex0y1s0t2nx0y0 <= 100
+-100 <= p0Flowex0y2s2t2nx0y0 <= 100
+-1 <= p0nx0y0Conservenx0y0 <= 1
+-10000 <= p0nx0y0SuperFlownx0y0 <= 10000
+-1 <= p0nx2y0Conservenx0y0 <= 1
+-10000 <= p0nx2y0SuperFlownx0y0 <= 10000
+-1 <= p0nx0y1Conservenx0y0 <= 1
+-10000 <= p0nx0y1SuperFlownx0y0 <= 10000
+-1 <= p0nx1y1Conservenx0y0 <= 1
+-10000 <= p0nx1y1SuperFlownx0y0 <= 10000
+-1 <= p0nx0y2Conservenx0y0 <= 1
+-10000 <= p0nx0y2SuperFlownx0y0 <= 10000
+-1 <= p0nx2y2Conservenx0y0 <= 1
+-10000 <= p0nx2y2SuperFlownx0y0 <= 10000
 -1 <= p0nx0y0Conservenx1y1 <= 1
 -10000 <= p0nx0y0SuperFlownx1y1 <= 10000
+-1 <= p0nx2y0Conservenx1y1 <= 1
+-10000 <= p0nx2y0SuperFlownx1y1 <= 10000
 -1 <= p0nx0y1Conservenx1y1 <= 1
 -10000 <= p0nx0y1SuperFlownx1y1 <= 10000
--1 <= p0nx1y0Conservenx1y1 <= 1
--10000 <= p0nx1y0SuperFlownx1y1 <= 10000
 -1 <= p0nx1y1Conservenx1y1 <= 1
 -10000 <= p0nx1y1SuperFlownx1y1 <= 10000
-
+-1 <= p0nx0y2Conservenx1y1 <= 1
+-10000 <= p0nx0y2SuperFlownx1y1 <= 10000
+-1 <= p0nx2y2Conservenx1y1 <= 1
+-10000 <= p0nx2y2SuperFlownx1y1 <= 10000
 Binaries
-p0Useex0y0s1t0
+p0Useex0y0s2t0
 p0Useex0y0s0t1
+p0Useex2y0s2t2
 p0Useex0y1s1t1
-p0Useex1y0s1t1
-
+p0Useex0y1s0t2
+p0Useex0y2s2t2
+p0nx0y0reachnx0y0
+p0nx0y0reachnx2y0
+p0nx0y0reachnx0y1
+p0nx0y0reachnx1y1
+p0nx0y0reachnx0y2
+p0nx0y0reachnx2y2

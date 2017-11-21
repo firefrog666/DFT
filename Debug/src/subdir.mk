@@ -7,8 +7,11 @@ CPP_SRCS += \
 ../src/Graph.cpp \
 ../src/ILP.cpp \
 ../src/ILPgen.cpp \
+../src/ListAlgorithm.cpp \
 ../src/chip.cpp \
 ../src/dateJournal_goodluck.cpp \
+../src/draw.cpp \
+../src/pso.cpp \
 ../src/testbench.cpp \
 ../src/toolBox.cpp \
 ../src/writeILP.cpp 
@@ -17,8 +20,11 @@ OBJS += \
 ./src/Graph.o \
 ./src/ILP.o \
 ./src/ILPgen.o \
+./src/ListAlgorithm.o \
 ./src/chip.o \
 ./src/dateJournal_goodluck.o \
+./src/draw.o \
+./src/pso.o \
 ./src/testbench.o \
 ./src/toolBox.o \
 ./src/writeILP.o 
@@ -27,8 +33,11 @@ CPP_DEPS += \
 ./src/Graph.d \
 ./src/ILP.d \
 ./src/ILPgen.d \
+./src/ListAlgorithm.d \
 ./src/chip.d \
 ./src/dateJournal_goodluck.d \
+./src/draw.d \
+./src/pso.d \
 ./src/testbench.d \
 ./src/toolBox.d \
 ./src/writeILP.d 

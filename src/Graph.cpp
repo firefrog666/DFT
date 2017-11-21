@@ -6,6 +6,7 @@
  */
 
 #include "Graph.h"
+#include <map>
 #include "toolBox.h"
 #include <iostream>
 #include <algorithm>
@@ -13,7 +14,12 @@
 #include <sstream>
 #include "../rapidxml-1.13/rapidxml.hpp"
 #include <cstring>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
+#include <math.h>
+#include "draw.h"
 using namespace std;
+
 
 int stringToInt(string s){
 	int r;
@@ -184,164 +190,21 @@ Graph::Graph(){
 
 Graph::Graph(const char* xmlFile){
 	creatNodes(xmlFile);
-	hashAllEdges();
-	creatCells(xmlFile);
-
-}
-
-V<Graph*> Graph::splitGraphByAxis(vector<float> xAxis,vector<float> yAxis){
-
-	V<Graph*> r;
-	Graph* upperGraph = new Graph();
-	r.push_back(upperGraph);
-	map<Node*,Graph*> upperNodeToSubGraph;
-	map<Graph*,Node*> subGraphToUpperNodes;
-	for(int i = 0; i < xAxis.size()-1;i++){
-		float lx = xAxis.at(i);
-		float rx = xAxis.at(i+1);
-		for(int j = 0; j < yAxis.size()-1;j++){
-			float dy = yAxis.at(j);
-			float uy = yAxis.at(j+1);
-			Node* upperNode = new Node(i,j);
-			upperGraph->nodes.push_back(upperNode);
-			upperGraph->hashNodes[upperNode->hashValue] = upperNode;
-
-			Graph* g = splitGraphByBoundingBox(lx,dy,rx,uy);
-			r.push_back(g);
-
-			upperNodeToSubGraph[upperNode] = g;
-			subGraphToUpperNodes[g] =upperNode;
-		}
-	}
-
-	for(Graph* subG0:r){
-		N upperNode0 = subGraphToUpperNodes[subG0];
-		for(Graph* subG1:r){
-			if(subG0 == subG1){
-				continue;
-			}
-			V<N> ventFromG0ToG1;
-			V<N> ventFromG1ToG0;
-			N upperNode1 = subGraphToUpperNodes[subG1];
-
-			for(Node* nSub0: subG0->nodes){
-				for(Node* nSub1:subG1->nodes){
-					if(nSub0->x == nSub1->x && nSub0->y == nSub1->y){
-						if(nSub0->getAdjNodes()->size() == 1){
-							ventFromG0ToG1.push_back(nSub0);
-						}
-						if(nSub1->getAdjNodes()->size() == 1){
-							ventFromG1ToG0.push_back(nSub1);
-						}
-					}
-				}
-			}
-
-			subG0->superNodeToVents[upperNode1] = ventFromG0ToG1;
-			subG1->superNodeToVents[upperNode0] = ventFromG1ToG0;
-
-			if(ventFromG0ToG1.size()>0){
-				upperNode0->addAdjNodes(upperNode1);
-				upperNode1->addAdjNodes(upperNode0);
-
-				Edge* upperE = new Edge(upperNode0,upperNode1);
-
-				upperGraph->edges.push_back(upperE);
-				upperGraph->hashEdges[upperE->hashValue] = upperE;
-			}
-
-		}
-	}
-
-	return r;
-
+	creatEdges(xmlFile);
+	//creatCells(xmlFile);
+	//creatEdgePair(xmlFile);
 }
 
 
 
-void Graph::creatCells(const char* xml){
-	//getNodes
-	rapidxml::xml_document<> doc;    // character type defaults to char
-	ifstream theFile (xml);
-	vector<char> buffer((istreambuf_iterator<char>(theFile)), istreambuf_iterator<char>());
-	buffer.push_back('\0');
-	// Parse the buffer using the xml file parsing library into doc
-	doc.parse<0>(&buffer[0]);
 
 
 
 
-	//initialize all edges
-	int cellcount = 1;
-	for (rapidxml::xml_node<> * cell = doc.first_node("cell"); cell; cell= cell->next_sibling())
-	{
-		if (strcmp(cell->name(), "cell") != 0)
-			continue;
-		Cell* c = new Cell();
-		c->name = s("c") + s(cellcount);
-		for (rapidxml::xml_node<> * edge = cell->first_node("edge"); edge; edge= edge->next_sibling())
-		{
-
-			int x = stringToInt(edge->first_attribute("x")->value());
-			int y = stringToInt(edge->first_attribute("y")->value());
-			int s = stringToInt(edge->first_attribute("s")->value());
-			int t = stringToInt(edge->first_attribute("t")->value());
-
-
-			Node* n0 = getNode(x,y);
-			Node* n1 = getNode(s,t);
-
-			Edge* e = getEdge(n0,n1);
-			assert(e != NULL);
-
-			c->adjEdges->push_back(e);
-
-		}
-		for(Edge* e:*c->adjEdges){
-			cout<< "adding edge " << e->name << " to " <<c->name<<endl;
-		}
-		cells.push_back(c);
-		cellcount++;
-
-	}
-	//super cell
-	for (rapidxml::xml_node<> * superCellXML = doc.first_node("superCell"); superCellXML; superCellXML= superCellXML->next_sibling())
-	{
-		if (strcmp(superCellXML->name(), "superCell") != 0)
-			continue;
-		superCell = new Cell();
-		superCell->name = s("c") + s(0);
-		for (rapidxml::xml_node<> * edge = superCellXML->first_node("edge"); edge; edge= edge->next_sibling())
-		{
-
-			int x = stringToInt(edge->first_attribute("x")->value());
-			int y = stringToInt(edge->first_attribute("y")->value());
-			int s = stringToInt(edge->first_attribute("s")->value());
-			int t = stringToInt(edge->first_attribute("t")->value());
-
-
-			Node* n0 = getNode(x,y);
-			Node* n1 = getNode(s,t);
-
-			Edge* e = getEdge(n0,n1);
-			assert(e != NULL);
-
-			superCell->adjEdges->push_back(e);
-
-		}
-		for(Edge* e:*superCell->adjEdges){
-			cout<< "adding edge " << e->name << " to " <<superCell->name<<endl;
-		}
-		for(Edge* e:*superCell->adjEdges){
-			cout<< "adding super edge " << e->name << " to " <<superCell->name<<endl;
-		}
-	}
-
-
-
-}
 void Graph::creatNodes(const char* nodes_xml){
+	cout<<"creating nodes from xml"<<endl;
 	//getNodes
+
 	rapidxml::xml_document<> doc;    // character type defaults to char
 	rapidxml::xml_node<> * root;
 	ifstream theFile (nodes_xml);
@@ -357,7 +220,8 @@ void Graph::creatNodes(const char* nodes_xml){
 	//initialize all nodes
 	for (rapidxml::xml_node<> * node = root->first_node("node"); node; node = node->next_sibling())
 	{
-
+		if (strcmp(node->name(), "node") != 0)
+					continue;
 		int x = stringToInt(node->first_attribute("x")->value());
 		int y = stringToInt(node->first_attribute("y")->value());
 		Node* n = new Node(x,y);
@@ -367,28 +231,6 @@ void Graph::creatNodes(const char* nodes_xml){
 		IdTonode[n->id] = n;
 	}
 
-	for (rapidxml::xml_node<> * node = root->first_node("node"); node; node = node->next_sibling())
-	{
-
-		int id = stringToInt(node->first_attribute("id")->value());
-		Node* thisNode = IdTonode[id];
-		int adjNode0 = stringToInt(node->first_attribute("adjNode0")->value());
-		int adjNode1 = stringToInt(node->first_attribute("adjNode1")->value());
-		int adjNode2 = stringToInt(node->first_attribute("adjNode2")->value());
-		int adjNode3 = stringToInt(node->first_attribute("adjNode3")->value());
-		if(adjNode0 >= 0){
-			thisNode->addAdjNodes(IdTonode[adjNode0]);
-		}
-		if(adjNode1 >= 0){
-			thisNode->addAdjNodes(IdTonode[adjNode1]);
-		}
-		if(adjNode2 >= 0){
-			thisNode->addAdjNodes(IdTonode[adjNode2]);
-		}
-		if(adjNode3 >= 0){
-			thisNode->addAdjNodes(IdTonode[adjNode3]);
-		}
-	}
 
 	for (rapidxml::xml_node<> * entrance = doc.first_node("entrance"); entrance; entrance = entrance->next_sibling())
 	{
@@ -414,62 +256,155 @@ void Graph::creatNodes(const char* nodes_xml){
 
 }
 
+//edge pair must be in 2 different
+void Graph::creatEdgePair(const char* xml){
+	cout<< "creating Edges pair"<<endl;
+	//getNodes
+	rapidxml::xml_document<> doc;    // character type defaults to char
 
-void Graph::sortEdgesInPath(vector<Edge*>* pathToSort){
+	ifstream theFile (xml);
+	vector<char> buffer((istreambuf_iterator<char>(theFile)), istreambuf_iterator<char>());
+	buffer.push_back('\0');
+	// Parse the buffer using the xml file parsing library into doc
+	doc.parse<0>(&buffer[0]);
 
-	vector<Edge*> visitedEdge;
-	vector<Edge*> sortedEdges;
-	Edge* e = pathToSort->back();
-	pathToSort->pop_back();
-	sortedEdges.push_back(e);
-	Node* firstNode = getNode(e->x,e->y);
-	Node* lastNode = getNode(e->s,e->t);
-	while(pathToSort->size()!=0){
-		Edge* targetEdge = NULL;
-		for(Edge* e:*pathToSort){
 
-			if(algo::vecContains(visitedEdge,e))
-				continue;
 
-			Node* ln = getNode(e->x,e->y);
-			Node* rn = getNode(e->s,e->t);
 
-			if(ln == firstNode){
-				visitedEdge.push_back(e);
-				sortedEdges.insert(sortedEdges.begin(),e);
-				firstNode = rn;
-				targetEdge = e;
-				break;
-			}
-			if(ln == lastNode){
-				visitedEdge.push_back(e);
-				sortedEdges.push_back(e);
-				targetEdge = e;
-				lastNode = rn ;
-				break;
-			}
-			if(rn == firstNode){
-				visitedEdge.push_back(e);
-				sortedEdges.insert(sortedEdges.begin(),e);
-				targetEdge = e;
-				firstNode = ln;
-				break;
-			}
-			if(rn == lastNode){
-				visitedEdge.push_back(e);
-				sortedEdges.push_back(e);
-				targetEdge = e;
-				lastNode = ln;
-				break;
-			}
+	map<int,Edge*> IdToEdge;
+	//initialize all nodes
+	for (rapidxml::xml_node<> * edgePair = doc.first_node("edgepair"); edgePair; edgePair = edgePair->next_sibling())
+	{
+
+		if (strcmp(edgePair->name(), "edgepair") != 0)
+					continue;
+
+		int id0 = stringToInt(edgePair->first_attribute("id1")->value());
+		int id1 = stringToInt(edgePair->first_attribute("id2")->value());
+		E e0 = NULL;
+		E e1 = NULL;
+		for(E e:edges){
+			if(e->id == id0)
+				e0 = e;
+			if(e->id == id1)
+				e1 = e;
 		}
+		assert(e0 != NULL);
+		assert(e1 != NULL);
 
-		//must find a edge
-		assert(targetEdge != NULL);
-		algo::remove(*pathToSort,targetEdge);
+		edgePair1.push_back(e0);
+		edgePair2.push_back(e1);
+
 	}
 
-	//
+
+}
+
+
+void Graph::creatEdges(const char* xml){
+	cout<< "creating Edges"<<endl;
+	//getNodes
+	rapidxml::xml_document<> doc;    // character type defaults to char
+	ifstream theFile (xml);
+	vector<char> buffer((istreambuf_iterator<char>(theFile)), istreambuf_iterator<char>());
+	buffer.push_back('\0');
+	// Parse the buffer using the xml file parsing library into doc
+	doc.parse<0>(&buffer[0]);
+
+
+
+	map<int,Edge*> IdToEdge;
+	//initialize all nodes
+	for (rapidxml::xml_node<> * edge = doc.first_node("edge"); edge; edge = edge->next_sibling())
+	{
+
+		if (strcmp(edge->name(), "edge") != 0)
+					continue;
+
+		int nodeId0 = stringToInt(edge->first_attribute("nodeId0")->value());
+		int nodeId1 = stringToInt(edge->first_attribute("nodeId1")->value());
+
+		int isWall = stringToInt(edge->first_attribute("isWall")->value());
+		int isHole = stringToInt(edge->first_attribute("isHole")->value());
+		int isStore = stringToInt(edge->first_attribute("isStore")->value());
+		//set adjEdges to Node
+		Node* n0 = getNodeById(nodeId0);
+		Node* n1 = getNodeById(nodeId1);
+
+		Edge* e = new Edge(n0,n1);
+		e->id = stringToInt(edge->first_attribute("id")->value());
+
+		hashEdges[e->hashValue] = e;
+		edges.push_back(e);
+		IdToEdge[e->id] = e;
+		e->isHole = isHole;
+		e->isWall = isWall;
+		e->isStore = isStore;
+
+
+
+		assert(n0 != NULL);
+		assert(n1 != NULL);
+		algo::distincAddVec(*n0->getAdjEdges(),e);
+		algo::distincAddVec(*n1->getAdjEdges(),e);
+		algo::distincAddVec(*n0->getAdjNodes(),n1);
+		algo::distincAddVec(*n1->getAdjNodes(),n0);
+
+	}
+
+
+}
+
+bool Graph::edgesConnected(E e0, E e1){
+	N e0n0 = getNode(e0->x,e0->y);
+	N e0n1 = getNode(e0->s,e0->t);
+	N e1n0 = getNode(e1->x,e1->y);
+	N e1n1 = getNode(e1->s,e1->t);
+
+	if(e0n0 == e1n0)
+		return true;
+	if(e0n0 == e1n1)
+		return true;
+	if(e0n1 == e1n0)
+		return true;
+	if(e0n1 == e1n1)
+		return true;
+
+	return false;
+}
+
+void Graph::sortEdgesInPath(vector<Edge*>* pathToSort){
+	N head = entrances.at(0);
+	E headEdge = NULL;
+	for(E adjE: *head->getAdjEdges() ){
+		if(algo::vecContains(*pathToSort,adjE))
+			headEdge = adjE;
+	}
+	assert(headEdge != NULL);
+
+	V<E> stack;
+	vector<Edge*> sortedEdges;
+	stack.push_back(headEdge);
+	while(stack.size()>0){
+		E edge = stack.back();
+		stack.pop_back();
+		sortedEdges.push_back(edge);
+
+		//find edges connected to edge
+		for(E eToSort:*pathToSort){
+			if(eToSort == edge)
+				continue;
+			if(algo::vecContains(sortedEdges,eToSort))
+				continue;
+			if(!edgesConnected(eToSort,edge))
+				continue;
+
+			stack.push_back(eToSort);
+
+		}
+	}
+	pathToSort->clear();
+
 	for(Edge* e:sortedEdges){
 		pathToSort->push_back(e);
 	}
@@ -484,66 +419,40 @@ vector<Edge*> Graph::pathNodesToEdges(vector<Node*> sortedNodes){
 		Node* lNode = *(it+1);
 
 		Edge* e = getEdge(fNode,lNode);
-		assert(e != NULL);
-
-		r.push_back(e);
+		//assert(e != NULL);
+		if(e != NULL)
+			r.push_back(e);
 	}
 	return r;
 }
 
 vector<Node*> Graph::edgesToNodes(const vector<Edge*>* sortedPath){
-	vector<Node*> result;
-	//no edge
-	assert(sortedPath->size()>0);
-	//1 edge
-	if(sortedPath->size() == 1){
-		Edge* e = sortedPath->front();
-		result.push_back(getNode(e->x,e->y));
-		result.push_back(getNode(e->s,e->t));
-		return result;
+	N head = entrances.at(0);
+
+	V<N> stack;
+	stack.push_back(head);
+	V<N> sortedNodes;
+	while(stack.size()>0){
+		N n = stack.back();
+		//cout<< "visiting "<< n->name<<endl;
+		stack.pop_back();
+		sortedNodes.push_back(n);
+		for(N adjNode : *n->getAdjNodes()){
+			if(algo::vecContains(sortedNodes,adjNode))
+				continue;
+			E e = getEdge(n,adjNode);
+
+			if(e  == NULL)
+				continue;
+
+			if(!algo::vecContains(*sortedPath,e))
+				continue;
+
+			stack.push_back(adjNode);
+		}
+
 	}
-
-	//2 or more edges
-	Edge* firstEdge = sortedPath->front();
-	for(Edge* secondEdge: *sortedPath){
-		if(firstEdge == secondEdge)
-			continue;
-		Node* fa = getNode(firstEdge->x,firstEdge->y);
-		Node* fb = getNode(firstEdge->s,firstEdge->t);
-		Node* sa = getNode(secondEdge->x,secondEdge->y);
-		Node* sb = getNode(secondEdge->s,secondEdge->t);
-
-		if(fa == sa){
-			algo::distincAddVec(result,fb);
-			algo::distincAddVec(result,sa);
-			algo::distincAddVec(result,sb);
-
-		}
-		else if(fa == sb){
-			algo::distincAddVec(result,fb);
-			algo::distincAddVec(result,sb);
-			algo::distincAddVec(result,sa);
-		}
-		else if(fb == sa){
-			algo::distincAddVec(result,fa);
-			algo::distincAddVec(result,sa);
-			algo::distincAddVec(result,sb);
-		}
-		else if(fb == sb){
-			algo::distincAddVec(result,fa);
-			algo::distincAddVec(result,sb);
-			algo::distincAddVec(result,sa);
-		}
-		else{
-			assert(!"two edges are not adjacent");
-		}
-
-		firstEdge = secondEdge;
-	}
-
-	return result;
-
-
+	return sortedNodes;
 
 }
 
@@ -561,6 +470,24 @@ Node* Graph::getLeftCorner(){
 	}
 
 	return result;
+}
+
+Node* Graph::getNodeById(int id){
+	N result = NULL;
+	for(Node* n:nodes){
+		if(n->id == id)
+			result = n;
+	}
+
+	return result;
+}
+
+E Graph::getEdgeById(int id){
+	for(E e:edges){
+		if(e->id == id)
+			return e;
+	}
+	return NULL;
 }
 
 Node* Graph::getNode(float i, float j){
@@ -660,598 +587,32 @@ Edge::Edge(Node* a, Node* b){
 	s = b->x;
 	t = b->y;
 	setName();
-
-	//cout<<"edge "<< x << " "<< y <<" "<<s<<" "<<t<<" "<< "has been created"<< endl;
-	//cout<<"hashValue is "<<hashValue<<endl;
-	//cout <<"edge name = "<<name<<endl;
-
-
-
-}
-
-bool Graph::edgeOnBrink(Edge* e,vector<Cell*> cells){
-	int cellContainEdsgeCount = 0;
-	for(Cell* c:cells){
-		if(!algo::vecContains(*c->adjEdges,e))
-			continue;
-		cellContainEdsgeCount++;
-		if(c->isOpen())
-			return true;
-	}
-
-	//if only one cell contain this edge, its also an open edge
-	assert(cellContainEdsgeCount > 0);
-	if(cellContainEdsgeCount == 1)
-		return true;
-
-
-	return false;
-}
-
-bool Graph::nodeOnTheBrink(Node* node){
-	int nbrCount = 0;
-	nbrCount = node->getAdjNodes()->size();
-
-
-	int nbrHas2Nbr = 0;
-
-	if(nbrCount == 4){
-		for(Node* nbr:*node->getAdjNodes()){
-			int nbrNbrCount = 0;
-			nbrNbrCount = nbr->getAdjNodes()->size();
-
-			if(nbrNbrCount<=3)
-				nbrHas2Nbr++;
-		}
-		if(nbrHas2Nbr >= 2){
-			return true;
-		}
-		else
-			return false;
-	}
-	else
-		return true;
-}
-
-vector<Node*> Graph::outSideNodes(){
-	vector<Node*> results;
-	vector<Cell*> cells = getCells();
-	for(Edge* e:edges){
-		if(edgeOnBrink(e,cells)){
-			Node* a = getNode(e->x,e->y);
-			Node* b = getNode(e->s,e->t);
-			assert(a != NULL);
-			assert(b != NULL);
-			algo::distincAddVec(results,a);
-			algo::distincAddVec(results,b);
-		}
-	}
-	return results;
-}
-vector<Node*> Graph::outSideWalk(Node* initNode){
-	vector<Cell*> cells =getCells();
-	vector<Node*> nodesOnBrink;
-
-	Node* lastNode = NULL;
-	Node* thisNode = initNode;
-
-	do{
-		algo::distincAddVec(nodesOnBrink,thisNode);
-		for(Node* nbr : *thisNode->getAdjNodes()){
-			if(nbr == lastNode)
-				continue;
-		/*	if(algo::vecContains(nodesOnBrink,nbr))
-				continue;*/
-
-			Edge* nbrEdge = getEdge(thisNode,nbr);
-			assert(nbrEdge != NULL);
-
-			if(edgeOnBrink(nbrEdge,cells)){
-				lastNode = thisNode;
-				thisNode = nbr;
-				break;
-			}
-		}
-	}while((thisNode != initNode));
-
-	return nodesOnBrink;
-
-}
-
-Cell* Graph::getSuperCell(V<Cell*> cells){
-	V<E> lonelyEdges;
-
-	for(E e:edges){
-		int parent = 0;
-		for(Cell* c:cells){
-			if(algo::vecContains(*c->adjEdges,e)){
-				parent++;
-			}
-		}
-
-		if(parent<=1){
-			lonelyEdges.push_back(e);
-		}
-	}
-
-	Cell* r = new Cell();
-	r->name = s("c") + S(0);
-	if(lonelyEdges.size()>0){
-		r->adjEdges->insert(r->adjEdges->end(),lonelyEdges.begin(),lonelyEdges.end());
-	}
-
-	return r;
-}
-
-vector<Cell*> Graph::getCells(){
-	vector<Cell*> cells;
-	int counter = 1;
-	for(Node* n:nodes){
-		Cell* c = new Cell();
-		c->name = s("c") + S(counter);
-		c->x = n->x;
-		c->y = n->y;
-		//adjNodes
-		for(int x = 0; x < 2; x++){
-			for(int y = 0; y < 2; y++){
-				Node* adjNode = getNode(c->x + x, c->y +y);
-				if(adjNode != NULL){
-					algo::distincAddVec(*c->adjNodes,adjNode);
-				}
-			}
-		}
-
-		//adjEdges;
-		for(Node* n0:*c->adjNodes){
-			for(Node* n1:*c->adjNodes){
-				if(n0 == n1)
-					continue;
-				Edge* adjEdge = getEdge(n0->x,n0->y,n1->x,n1->y);
-				if(adjEdge != NULL)
-					algo::distincAddVec(*c->adjEdges,adjEdge);
-			}
-		}
-		algo::distincAddVec(cells,c);
-		counter++;
-	}
-
-
-
-	return cells;
-}
-vector<Node*> Graph::outSideWalk(Node* initNode, int steps){
-	vector<Node*> nodesOnBrink;
-
-	Node* lastNode = NULL;
-	Node* thisNode = initNode;
-	int stepCover = 0;
-	while(stepCover < steps){
-		stepCover++;
-		algo::distincAddVec(nodesOnBrink,thisNode);
-		for(Node* nbr : *thisNode->getAdjNodes()){
-			if(nbr == lastNode)
-				continue;
-
-			if(algo::vecContains(nodesOnBrink,nbr))
-				continue;
-
-			Edge* nbrEdge = getEdge(thisNode,nbr);
-			assert(nbrEdge != NULL);
-			vector<Cell*> cells =getCells();
-			if(edgeOnBrink(nbrEdge,cells)){
-				lastNode = thisNode;
-				thisNode = nbr;
-				break;
-			}
-		}
-	}
-
-
-	return nodesOnBrink;
-}
-
-
-Graph* Graph::splitGraphByBoundingBox(float ld_x, float ld_y, float ru_x, float ru_y){
-	Graph* result;
-	vector<Node*> nodesInBox;
-	//add nodes in this bounding box
-	for(Node* n:nodes){
-		if(n->x >= ld_x && n->y >= ld_y && n->x <= ru_x && n->y <= ru_y)
-			nodesInBox.push_back(n);
-	}
-
-	result = new Graph(nodesInBox,this);
-
-	return result;
 }
 
 
 
-vector<vector<Edge*>*> Graph::connectPaths(vector<vector<Edge*>*>& p1Set, vector<vector<Edge*>*>& p2Set){
-
-	vector<vector<Edge*>*> result;
-
-	vector<int> usedPathInP1;
-	vector<int> usedPathInP2;
-	map<int,int> p1containsEdge;
-	map<int,int> p2containsEdge;
-
-
-	//for each path in p1, find a path in p2, connect them
-	while(p1Set.size() > usedPathInP1.size()){
-		int itP1 = 0;
-		while(algo::vecContains(usedPathInP1,itP1)){
-			itP1++;
-		}
-
-		Edge* sharedEdge;
-		vector<Edge*>* p1 = p1Set.at(itP1);
-		usedPathInP1.push_back(itP1);
-
-		bool findP1InP2Set = false;
-		for(int itP2 = 0; itP2<p2Set.size();itP2++){
-			if(algo::vecContains(usedPathInP2,itP2))
-				continue;
-
-			vector<Edge*>* p2 = p2Set.at(itP2);
-
-			if(pathShareSameEdge(p1,p2)!=NULL){
-				sharedEdge = pathShareSameEdge(p1,p2);
-				vector<Edge*>* p = new vector<Edge*>();
-
-				*p = connectPaths(*p1,*p2);
-				result.push_back(p);
-
-				p2containsEdge[sharedEdge->hashValue] = itP2;
-				findP1InP2Set = true;
-				usedPathInP2.push_back(itP2);
-				break;
-			}
-		}
-		if(!findP1InP2Set){
-			int itP2 = p2containsEdge[sharedEdge->hashValue];
-			vector<Edge*>* p2 = p2Set.at(itP2);
-			vector<Edge*>* p = new vector<Edge*>();
-			*p = connectPaths(*p1,*p2);
-			result.push_back(p);
-		}
-	}
-
-
-	//for each path in p1, find a path in p2, connect them
-	while(p2Set.size() > usedPathInP2.size()){
-		int itP2 = 0;
-		while(algo::vecContains(usedPathInP2,itP2)){
-			itP2++;
-		}
-
-		Edge* sharedEdge;
-		vector<Edge*>* p2 = p2Set.at(itP2);
-		usedPathInP1.push_back(itP2);
-
-		bool findP2InP1Set = false;
-		for(int itP1 = 0; itP1<p1Set.size();itP1++){
-			if(algo::vecContains(usedPathInP1,itP1))
-				continue;
-
-			vector<Edge*>* p1 = p1Set.at(itP1);
-
-			if(pathShareSameEdge(p2,p1)!=NULL){
-				sharedEdge = pathShareSameEdge(p2,p1);
-				vector<Edge*>* p = new vector<Edge*>();
-
-				*p = connectPaths(*p2,*p1);
-				result.push_back(p);
-
-				p2containsEdge[sharedEdge->hashValue] = itP2;
-				findP2InP1Set = true;
-				usedPathInP1.push_back(itP1);
-				break;
-			}
-		}
-		if(!findP2InP1Set){
-			int itP1 = p1containsEdge[sharedEdge->hashValue];
-			vector<Edge*>* p1 = p1Set.at(itP1);
-			vector<Edge*>* p = new vector<Edge*>();
-			*p = connectPaths(*p1,*p2);
-			result.push_back(p);
-		}
-	}
-
-	return result;
-}
-
-Edge* Graph::pathShareSameEdge(vector<Edge*>* p1, vector<Edge*>* p2){
-	if(p1->front() == p2->front())
-		return p1->front();
-	else if(p1->back() == p2->front())
-		return p1->back();
-	else if(p1->front() == p2->back())
-		return p1->front();
-	else if(p1->back() == p2->back())
-		return p1->back();
-	else
-		return NULL;
-}
-
-vector<Edge*> Graph::connectPaths(vector<Edge*> path1, vector<Edge*> path2){
-
-	Edge* p1Head = path1.front();
-	Edge* p1Tail = path1.back();
-	Edge* p2Head = path2.front();
-	Edge* p2Tail = path2.back();
-
-	if(Edge::sameEdge(p1Head,p2Head)){
-		reverse(path1.begin(),path1.end());
-		path1.pop_back();
-	}
-	else if(Edge::sameEdge(p1Tail,p2Head)){
-		path1.pop_back();
-	}
-	else if(Edge::sameEdge(p1Head,p2Tail)){
-		reverse(path1.begin(),path1.end());
-		path1.pop_back();
-		reverse(path2.begin(),path2.end());
-	}
-	else if(Edge::sameEdge(p1Tail,p2Tail)){
-		path1.pop_back();
-		reverse(path2.begin(),path2.end());
-	}
-
-	for(Edge* e:path2){
-		path1.push_back(e);
-	}
-
-	return path1;
-}
-
-
-
-vector<Node*> Graph::getHoleNodes(Node* seed){
-	vector<Node*> holeNodes;
-	vector<Node*> newHoleNodes;
-
-	vector<Node*> queue	;
-	queue.push_back(seed);
-
-
-	while(queue.size()>0){
-
-		Node* n = queue.front();
-		queue.erase(queue.begin());
-		for(Node* nbr :* n->getAdjNodes()){
-			if(algo::vecContains(holeNodes,nbr))
-				continue;
-			Edge* nbrEdge = getEdge(n,nbr);
-			assert(nbrEdge!=NULL);
-
-			if(nbrEdge->isHole){
-				holeNodes.push_back(nbr);
-				queue.push_back(nbr);
-			}
-		}
-
-	}
-
-	return holeNodes;
-}
-
-
-
-//find a set of walls to set apart one graph into several graphs
-vector<Graph*> Graph::splitGraph(int graphNum, unsigned int eachGraphValveSize){
-
-	vector<Graph*> result;
-
-
-
-	//Node* initNode = getNode(1,0);
-	Node* initNode = getLeftCorner();
-	//set vent for each graph
-
-
-	vector<vector<Node*>*> initNodesofGraph;
-	vector<int> ventGaps;
-	//calculate perimeter of the graph
-	vector<Node*> brinkNodes = outSideWalk(initNode);
-	int primeter = brinkNodes.size();
-	int firstGap = primeter/(graphNum);
-	int lastGap = primeter - firstGap * (graphNum-1);
-	for(int i = 0; i<graphNum; i++){
-		vector<Node*>* temp = new vector<Node*>();
-		initNodesofGraph.push_back(temp);
-		if(i<graphNum-1){
-			ventGaps.push_back(firstGap);
-			for(int i = 0; i < firstGap;i++){
-				temp->push_back(brinkNodes.front());
-				brinkNodes.erase(brinkNodes.begin());
-			}
-		}
-		else{
-			for(int i = 0; i < lastGap;i++){
-				ventGaps.push_back(lastGap);
-				temp->push_back(brinkNodes.front());
-				brinkNodes.erase(brinkNodes.begin());
-			}
-		}
-	}
-
-
-	//set entrances and exits for each subGraph
-	vector<Node*> entrancesSubGraphs;
-	vector<Node*> exitsSubGraphs;
-	for(vector<Node*>* initNodes:initNodesofGraph){
-		Node* entrance = initNodes->front();
-		Node* ha = initNodes->back();
-
-		entrancesSubGraphs.push_back(entrance);
-		exitsSubGraphs.push_back(ha);
-	}
-
-
-
-	//bread first search for each path
-	vector<bool> graphExtendFlags;
-	for(int i = 0; i < graphNum; i++){
-		graphExtendFlags.push_back(true);
-	}
-	bool needExpand = true;
-	do{
-		for(int i = 0; i < graphNum; i++){
-			if(graphExtendFlags.at(i) == false)
-				continue;
-
-			vector<Node*>* initNodes = initNodesofGraph.at(i);
-			//expand it!
-			vector<Node*> nodesToAdd;
-			nodesToAdd.clear();
-			for(Node* n:*initNodes){
-				vector<Node*> holeNodes; //contain all nodes in a hole, add them all!
-
-
-				//node is not on the brink of a hole
-				for(Node* nbr:* n->getAdjNodes()){
-
-					if(find(initNodes->begin(), initNodes->end(), nbr) != initNodes->end()){
-						continue;
-					}
-
-					bool nbrIsInOtherGraph = false;
-					for(int j = 0; j < graphNum; j++){
-						if(j == i )
-							continue;
-						vector<Node*>* nodesInOtherGraph = initNodesofGraph.at(j);
-						if(find(nodesInOtherGraph->begin(), nodesInOtherGraph->end(), nbr) != nodesInOtherGraph->end()){
-							nbrIsInOtherGraph = true;
-							break;
-						}
-					}
-
-					if(nbrIsInOtherGraph)
-						continue;
-
-
-
-
-					//when you want to push in a neighbor
-					if(find(nodesToAdd.begin(), nodesToAdd.end(), nbr) == nodesToAdd.end()){
-						nodesToAdd.push_back(nbr);
-
-						//check if its neighbor is a whole
-						//if is hole
-						for(Node* nbrnbr:*nbr->getAdjNodes()){
-							Edge* nbrnbrEdge = getEdge(nbrnbr,nbr);
-							if(nbrnbrEdge->isHole){
-								holeNodes = getHoleNodes(nbr);
-								for(Node* holeNode:holeNodes){
-									//in its own nodes, dont add
-									if(algo::vecContains(*initNodes,holeNode)){
-										continue;
-									}
-
-									//in other sub Graphs, dont add
-									bool holeNodeIsInOtherGraph = false;
-									for(int j = 0; j < graphNum; j++){
-										if(j == i )
-											continue;
-										vector<Node*>* nodesInOtherGraph = initNodesofGraph.at(j);
-										if(algo::vecContains(*nodesInOtherGraph,holeNode)){
-											holeNodeIsInOtherGraph = true;
-											break;
-										}
-									}
-
-									if(holeNodeIsInOtherGraph)
-										continue;
-									//add
-									if(!algo::vecContains(nodesToAdd,holeNode)){
-										nodesToAdd.push_back(holeNode);
-									}
-								}
-								continue;
-							}
-						}
-
-					}
-				}
-			}
-
-
-			//no nodes could be added
-			if(nodesToAdd.size() == 0){
-				graphExtendFlags.at(i) = false;
-				continue;
-			}
-
-			for(Node* n:nodesToAdd){
-				initNodes->push_back(n);
-			}
-
-			//calculate the size of the subGraph
-			int subGraphValveSize = 0;
-			for(Node* n:*initNodes){
-				for(Node* nbr:*n->getAdjNodes()){
-					if(algo::vecContains(*initNodes,nbr)){
-						Edge* e = getEdge(n,nbr);
-						if(!e->isHole)
-							subGraphValveSize++;
-					}
-				}
-			}
-			subGraphValveSize = subGraphValveSize/2;
-
-			if(subGraphValveSize >= eachGraphValveSize)
-				graphExtendFlags.at(i) = false;
-		}
-
-		needExpand = false;
-		for(bool extend:graphExtendFlags){
-			if(extend == true){
-				needExpand = true;
-				break;
-			}
-		}
-
-	}while(needExpand);
-
-
-	//creat each subGraph
-	for(vector<Node*>* initNodes:initNodesofGraph){
-		Graph* subGraph = new Graph(*initNodes,this);
-
-
-		//heads and tails
-		Node* etranceInMainGraph = entrancesSubGraphs.front();
-		entrancesSubGraphs.erase(entrancesSubGraphs.begin());
-		Node* exitInMainGraph = exitsSubGraphs.front();
-		exitsSubGraphs.erase(exitsSubGraphs.begin());
-
-		Node* entranceInSubGraph = subGraph->getNode(etranceInMainGraph->x,etranceInMainGraph->y);
-		Node* exitInSubGraph = subGraph->getNode(exitInMainGraph->x,exitInMainGraph->y);
-		assert(entranceInSubGraph != NULL);
-		assert(exitInSubGraph != NULL);
-
-		subGraph->entrances.push_back(entranceInSubGraph);
-		subGraph->exits.push_back(exitInSubGraph);
-
-		result.push_back(subGraph);
-	}
-	return result;
-
-
-}
 
 void Graph::hashAllEdges(){
+		int edgeCount = 0;
 	for(Node* node:nodes){
 		auto adjNodes = node->getAdjNodes();
 		for(Node* adjNode: *adjNodes){
 
 			if(!getEdge(adjNode,node)){
 				Edge* edge = new Edge(node,adjNode);
-
+				edge->id = edgeCount;
+				edgeCount++;
 				edges.push_back(edge);
 				hashEdges[edge->hashValue] = edge;
+			/*	cout << S("<edge") + S(" id = \"") +S(edge->id) +S("\" ") + S(" x = \"") + S(edge->x) + S("\" ")
+				+ S(" y = \"") + S(edge->y) + S("\" ")
+				+ S(" s = \"") + S(edge->s) + S("\" ")
+				+ S(" t = \"") + S(edge->t) + S("\" ")
+				+ S(" isHole = \"") + S(edge->isHole) + S("\" ")
+				+ S(" isWall = \"") + S(edge->isWall) + S("\" ") + S("></edge>")<<endl;*/
 
+
+				//cout<<"creating edge id " << edge->id<< " name "<<edge->name <<endl;
 				//hashTarEdges.put(edge.hashValue(), edge);
 			}
 		}
@@ -1276,278 +637,200 @@ void Graph::hashAllEdges(){
 
 		for(Edge* adjEdge:*n0->getAdjEdges()){
 			if(adjEdge != e){
-				e->adjEdges->push_back(adjEdge);
+				//e->adjEdges->push_back(adjEdge);
 			}
 		}
 
 		for(Edge* adjEdge:*n1->getAdjEdges()){
 			if(adjEdge != e){
-				e->adjEdges->push_back(adjEdge);
+				//e->adjEdges->push_back(adjEdge);
 			}
 		}
  	}
 }
 
 
-void Graph::removeEdge(Edge* e){
 
-	if(e == NULL)
+//delete walls for cut
+
+V<E> Graph::getAdjEdges(E e){
+	V<E> r;
+	N n0 = getNode(e->x,e->y);
+	N n1 = getNode(e->s,e->t);
+
+	for(E adjEdge : *n0->getAdjEdges()){
+		if(adjEdge == e)
+			continue;
+		//cout<< e->name<<" 's adj edge" << adjEdge->name<<endl;
+		r.push_back(adjEdge);
+	}
+	for(E adjEdge : *n1->getAdjEdges()){
+		if(adjEdge == e)
+			continue;
+		//cout<< e->name<<" 's adj edge" << adjEdge->name<<endl;
+		r.push_back(adjEdge);
+	}
+	return r;
+}
+
+void Graph::removeNode(Node * n){
+	if(!algo::vecContains(nodes,n)){
+		cout<< " i have no n, so be it"<<endl;
 		return;
+	}
+	if(n->getAdjEdges()->size()>0){
+		cout<< " cannot remove this node, have adj edges"<<endl;
+		exit(-1);
+	}
 
-	Node* a = getNode(e->x,e->y);
-	Node* b = getNode(e->s,e->t);
-
-	algo::remove(*a->getAdjEdges(),e);
-	algo::remove(*b->getAdjEdges(),e);
-	algo::remove(*a->getAdjNodes(),b);
-	algo::remove(*b->getAdjNodes(),a);
+	algo::remove(nodes,n);
+	hashNodes.erase(n->hashValue);
 
 
-	auto it = find(edges.begin(),edges.end(),e);
-	edges.erase(it);
+}
+bool Graph::addNode(N n){
+	if(algo::mapContains(hashNodes,n->hashValue)){
+		cout << n->name <<" has existed, return false"<<endl;
+		return false;
+	}
 
-	auto hashIt = hashEdges.find(algo::hash4Int(e->x,e->y,e->s,e->t));
-	hashEdges.erase(hashIt);
+	nodes.push_back(n);
+	hashNodes[n->hashValue] = n;
 
 }
 
-void Graph::removeNode(Node* n){
-	//remove all the edges attached to it
-	while(n->getAdjNodes()->size()>0){
-		Node* nbr = n->getAdjNodes()->back();
-		n->getAdjNodes()->pop_back();
-
-		Edge* e = getEdge(n,nbr);
-		if(e != NULL)
-			removeEdge(e);
-	}
-	if(n != NULL)
-		algo::remove(nodes,n);
-
-	auto hashIt = hashNodes.find(algo::hash2Int(n->x,n->y));
-	hashNodes.erase(hashIt);
-}
-
-void Graph::cutOffSubGraph(Graph* subGraph){
-	//cut off nodes
-	for(Node* subNode:subGraph->nodes){
-		Node* mainGraphNode = getNode(subNode->x,subNode->y);
-		removeNode(mainGraphNode);
+//if e aleady exits, return false, or return true;
+bool Graph::addEdges(V<E> edgesToAdd){
+	for (E e:edgesToAdd){
+		addEdge(e);
 	}
 }
+bool Graph::addEdge(E e){
+	if(algo::mapContains(hashEdges,e->hashValue)){
+		cout << e->name <<" has existed, return false"<<endl;
+		return false;
+	}
+	cout<<"adding edge "<<e->name<<endl;
 
-vector<Edge*> Graph::getWallsBetweenSubGrapsh(vector<Graph*>* subGraphs){
+	N n0 = getNode(e->x,e->y);
+	N n1 = getNode(e->s,e->t);
 
 
-	vector<Edge*> walls;
-	//outside walk for each Graph to get all the brink
-	for(Graph* subGraph: *subGraphs){
-		vector<Node*> brinkNode = subGraph->outSideNodes();
-		//get walls in the main graph
-		for(Node* n:brinkNode){
-			Node* nodeInMainGraph = this->getNode(n->x,n->y);
 
-			assert(nodeInMainGraph!=NULL);
-
-			for(Edge* edgeInMainGraph:*nodeInMainGraph->getAdjEdges()){
-				float x = edgeInMainGraph->x;
-				float y = edgeInMainGraph->y;
-				float s = edgeInMainGraph->s;
-				float t = edgeInMainGraph->t;
-				Edge* edgeInSubGraph = subGraph->getEdge(x,y,s,t);
-				if(edgeInSubGraph == NULL){
-					algo::distincAddVec(walls,edgeInMainGraph);
-				}
-			}
-
-		}
-
+	if(n0 == NULL){
+		N newN0 = new Node(e->x,e->y);
+		n0 = newN0;
+		addNode(newN0);
+	}
+	if(n1 == NULL){
+		N newN1 = new Node(e->s,e->t);
+		n1 = newN1;
+		addNode(newN1);
 	}
 
 
 
-	return walls;
+
+	n0->addAdjNodes(n1);
+	n1->addAdjNodes(n0);
+	edges.push_back(e);
+	hashEdges[e->hashValue] = e;
+	n0->addAdjEdges(e);
+	n1->addAdjEdges(e);
+	return true;
 }
 
-Graph* Graph::fromGraphToChip(){
-	Graph* chip = new Graph();
 
-	//create joints
-	for(Node* n:nodes){
-		float l = n->x - 0.5;
-		float d = n->y - 0.5;
-		float r = n->x + 0.5;
-		float u = n->y + 0.5;
+void Graph::replaceNode(N target,N newNode){
+	cout<<"replace node "<<target->name<<" to "<<newNode->name<<endl;
 
-		float ld = algo::hash2Int(l,d);
-		float lu = algo::hash2Int(l,u);
-		float rd = algo::hash2Int(r,d);
-		float ru = algo::hash2Int(r,u);
+	while(target->getAdjEdges()->size() >0){
+		E adjE = target->getAdjEdges()->front();
+		N otherNode = NULL;
+		N n0 = getNode(adjE->x,adjE->y);
+		N n1 = getNode(adjE->s,adjE->t);
+		if(n0 == target)
+			otherNode = n1;
+		else
+			otherNode = n0;
 
-		if(!algo::mapContains(chip->hashNodes,ld)){
-			Node* ldJoint = new Node(l,d);
-			chip->hashNodes[ld] = ldJoint;
-			chip->nodes.push_back(ldJoint);
-		}
-		if(!algo::mapContains(chip->hashNodes,lu)){
-			Node* luJoint = new Node(l,u);
-			chip->hashNodes[lu] = luJoint;
-			chip->nodes.push_back(luJoint);
-		}
-		if(!algo::mapContains(chip->hashNodes,rd)){
-			Node* rdJoint = new Node(r,d);
-			chip->hashNodes[rd] = rdJoint;
-			chip->nodes.push_back(rdJoint);
-		}
-		if(!algo::mapContains(chip->hashNodes,ru)){
-			Node* ruJoint = new Node(r,u);
-			chip->hashNodes[ru] = ruJoint;
-			chip->nodes.push_back(ruJoint);
-		}
-	}
+		//remove this edge
+		removeEdge(adjE);
 
-	//find neigbour nodes
-	for(Node* n:chip->nodes){
-		float x = n->x;
-		float y = n->y;
+		//creat new Edge
 
-		float d = y - 1;
-		float u = y + 1;
-		float l = x - 1;
-		float r = x + 1;
+		E newE = new Edge(otherNode,newNode);
 
-		Node* ln = chip->getNode(l,y);
-		Node* rn = chip->getNode(r,y);
-		Node* un = chip->getNode(x,u);
-		Node* dn = chip->getNode(x,d);
+		newE->cpySpecFrom(adjE);
 
-		if(ln != NULL)
-			n->getAdjNodes()->push_back(ln);
-		if(rn != NULL)
-			n->getAdjNodes()->push_back(rn);
-		if(un != NULL)
-			n->getAdjNodes()->push_back(un);
-		if(dn != NULL)
-			n->getAdjNodes()->push_back(dn);
+
+		//if adjE is already new Edge, find its father
+		if(algo::mapContains(newEdgeToOldEde,adjE))
+			newEdgeToOldEde[newE] = newEdgeToOldEde[adjE];
+		else
+			newEdgeToOldEde[newE] = adjE;
+
+		cout<<"add new edge "<<newE->name<<endl;
+
+		//connect old node to new node
+		addEdge(newE);
+
 
 	}
-
-	//create valves
-	for(Node* n0:chip->nodes){
-		for(Node* n1:*n0->getAdjNodes()){
-			Edge* valve = new Edge(n0,n1);
-			if(algo::mapContains(chip->hashEdges,valve->hashValue)){
-				delete valve;
-				continue;
-			}
-
-			n0->getAdjEdges()->push_back(valve);
-			n1->getAdjEdges()->push_back(valve);
-
-
-			Edge* intercectedEdge = NULL;
-			for(Edge* e:edges){
-				if(valve->intercectEdge(e))
-					intercectedEdge = e;
-			}
-
-			if(intercectedEdge == NULL){
-				chip->hashEdges[valve->hashValue] = valve;
-				chip->edges.push_back(valve);
-
-				brinkEdges.push_back(valve);
-				valve->isWall = true;
-				valve->isHole = false;
-				valve->isOn = false;
-				valve->sa0 = false;
-				valve->sa1 = false;
-
-
-			}
-			else{
-				if(intercectedEdge->isHole)
-					cout<< "i find a hole!"<<endl;
-				insideEdges.push_back(valve);
-				chip->hashEdges[valve->hashValue] = valve;
-				chip->edges.push_back(valve);
-				valve->isWall  = intercectedEdge->isWall;
-				valve->isHole = intercectedEdge->isHole;
-				valve->isOn = intercectedEdge->isOn;
-				valve->sa0 = intercectedEdge->sa0;
-				valve->sa1 = intercectedEdge->sa1;
-			}
-
-		}
+	//remove adjEdges
+	assert(target->getAdjEdges()->size() == 0);
+	assert(target->getAdjNodes()->size() == 0);
+	if(algo::vecContains(entrances,target)){
+		algo::remove(entrances,target);
+		entrances.push_back(newNode);
 	}
 
-	//add head and tails for cuts
-	//assume only one head and one tail
-	N head = entrances.at(0);
-	N tail = exits.at(0);
-	V<N> nodesOnBrink =outSideWalk(head);
-	V<N> nodesOnLeftBrink;
-	V<N> nodesOnRightBrink;
-	int tailPos = 0;
-	for(int i = 0;;i++){
-		N n = nodesOnBrink.at(i);
-		if(n == tail){
-			nodesOnLeftBrink.push_back(tail);
-			break;
-		}
-
-		nodesOnLeftBrink.push_back(n);
-		tailPos++;
-	}
-
-	for(int i = tailPos; i<nodesOnBrink.size();i++){
-		N n = nodesOnBrink.at(i);
-		nodesOnRightBrink.push_back(n);
-	}
-	nodesOnRightBrink.push_back(head);
-
-	V<E> edgeOnLeftBrink  = pathNodesToEdges(nodesOnLeftBrink);
-	V<E> edgeOnRightBrink  = pathNodesToEdges(nodesOnRightBrink);
-
-	V<N> outSideJoint = chip->outSideNodes();
-
-	for(E e_graph:edgeOnLeftBrink){
-		for(E valve:chip->edges){
-			if(e_graph->intercectEdge(valve)){
-				N n0 = chip->getNode(valve->x,valve->y);
-				N n1 = chip->getNode(valve->s,valve->t);
-
-				if(algo::vecContains(outSideJoint,n0)){
-					chip->entrances.push_back(n0);
-				}
-
-				if(algo::vecContains(outSideJoint,n1)){
-					chip->entrances.push_back(n1);
-				}
-			}
-		}
-	}
-
-	for(E e_graph:edgeOnRightBrink){
-		for(E valve:chip->edges){
-			if(e_graph->intercectEdge(valve)){
-				N n0 = chip->getNode(valve->x,valve->y);
-				N n1 = chip->getNode(valve->s,valve->t);
-
-				if(algo::vecContains(outSideJoint,n0)){
-					chip->exits.push_back(n0);
-				}
-
-				if(algo::vecContains(outSideJoint,n1)){
-					chip->exits.push_back(n1);
-				}
-			}
-		}
+	if(algo::vecContains(exits,target)){
+		algo::remove(exits,target);
+		exits.push_back(newNode);
 	}
 
 
-	return chip;
+
+
+	removeNode(target);
+}
+
+void Graph::removeEdge(E e){
+	if(!algo::vecContains(edges,e)){
+		cout<<"no edge "<<e->name<<endl;
+		return;
+	}
+	cout<< "removing edge "<<e->name<<endl;
+	N n0 = getNode(e->x,e->y);
+	N n1 = getNode(e->s,e->t);
+	assert(n0 != NULL);
+	assert(n1 != NULL);
+	algo::remove(*n0->getAdjNodes(),n1);
+
+	algo::remove(*n1->getAdjNodes(),n0);
+
+
+
+	algo::remove(*n0->getAdjEdges(),e);
+
+	algo::remove(*n1->getAdjEdges(),e);
+
+	if(n0->getAdjEdges()->size() == 0)
+		removeNode(n0);
+	if(n1->getAdjEdges()->size() == 0)
+		removeNode(n1);
+	algo::remove(edges,e);
+	hashEdges.erase(e->hashValue);
+
+
 
 }
+
+
+
+
+
 
 void Graph::moveGraph(float x, float y){
 	hashNodes.clear();
@@ -1592,15 +875,15 @@ void Graph::initTest(int w, int h){
 
 	//give number to each Node; Hash nodes
 	int id = 0;
-
+	width = w;
+	height = h;
 	for(int i = 0; i< w; i++){
 		for(int j =0; j < h; j ++){
-			if(i == 2 && j ==9)
-				cout<<"stop"<<endl;
+
 			Node* node = new Node(i,j);
 			nodes.push_back(node);
 			float index = algo::hash2Int(i,j);
-			cout<<"index is "<<index<<endl;
+			//cout<<"index is "<<index<<endl;
 			hashNodes[index] =  node;
 			id ++;
 
@@ -1610,7 +893,7 @@ void Graph::initTest(int w, int h){
 	entrances.push_back(getNode(0,0));
 	//entrances.push_back(getNode(0,h-1));
 
-	exits.push_back(getNode(w-1,0));
+	//exits.push_back(getNode(w-1,0));
 	exits.push_back(getNode(w-1,h-1));
 
 	//assign joint nodes to each node
@@ -1640,259 +923,10 @@ void Graph::initTest(int w, int h){
 
 	hashAllEdges();
 
-		V<Cell*> allcells = getCells();
-		//is cell is open, drop it
-		for(Cell* c:allcells){
-			if(c->isOpen())
-				continue;
-			cells.push_back(c);
-		}
-
 
 }
 
-vector<vector<Edge*>> Graph::getPathsFromEdges(vector<Edge*> edgeSet){
-	vector<vector<Edge*>> groups = getGroupsFromEdges(edgeSet);
 
-
-	vector<vector<Edge*>> paths;
-	for(Node* head:entrances){
-		for(vector<Edge*> group:groups){
-			for(Edge* groupE:group){
-				if(nodeOnEdge(head,groupE)){
-					paths.push_back(group);
-					break;
-				}
-			}
-		}
-	}
-
-	return paths;
-}
-
-vector<Node*> Graph::getNodesInOrOnAllRings(vector<vector<Edge*>> allRings){
-	vector<Node*> nodesInsideRings;
-	for(vector<Edge*> ring:allRings){
-		vector<Node*> nodesInsideRing = getNodesInRing(ring);
-		vector<Node*> nodesOnRing = getNodesOnRing(ring);
-		nodesInsideRings.insert(nodesInsideRings.end(),nodesInsideRing.begin(),nodesInsideRing.end());
-		nodesInsideRings.insert(nodesInsideRings.end(),nodesOnRing.begin(),nodesOnRing.end());
-	}
-	return nodesInsideRings;
-}
-
-vector<Node*> Graph::getNodesOutAllRings(vector<vector<Edge*>> allRings){
-	vector<Node*> nodesOutRings;
-	vector<Node*> nodesInsideRings = getNodesInOrOnAllRings(allRings);
-
-	for(Node* n:nodes){
-		if(algo::vecContains(nodesInsideRings,n))
-			continue;
-
-		algo::distincAddVec(nodesOutRings,n);
-	}
-
-
-	return nodesOutRings;
-}
-
-V<PATHE> Graph::fromStepToShortedPath(map<N,int>steps, V<N> starts,V<N> disabledNodes){
-	V<PATHE> shortedPaths;
-	V<N> neareastNodes;
-
-	int near = 10000;
-	for(N n:starts){
-		if (steps[n] < near){
-			near = steps[n];
-		}
-	}
-
-	for(N n: starts){
-		if (steps[n] == near){
-			neareastNodes.push_back(n);
-			cout<<"nearest nodes are " <<n->name<<endl;
-		}
-
-	}
-
-	for(N n:neareastNodes){
-		V<PATHE> paths = fromStepToPath(steps,n,disabledNodes);
-		 shortedPaths.insert(shortedPaths.end(),paths.begin(),paths.end());
-	}
-
-	return shortedPaths;
-}
-
-vector<vector<Edge*>> Graph::fromStepToPath(map<Node*,int>steps, Node* start,V<N> disabledNodes){
-	vector<vector<Edge*>> r;
-	Node* sential = new Node();
-	vector<Node*> stack;
-	vector<Node*> divergeNodes;
-	vector<Node*> path;
-
-	stack.push_back(start);
-	divergeNodes.push_back(sential);
-
-	while(stack.size()>0){
-		Node* divergeNode = divergeNodes.back(); divergeNodes.pop_back();
-		Node* n = stack.back();
-		stack.pop_back();
-
-		algo::pop_To_Element(path,divergeNode);
-		path.push_back(n);
-
-		//finding end
-		if(steps[n] == 0){
-			vector<Edge*> pathEdges = pathNodesToEdges(path);
-			r.push_back(pathEdges);
-			continue;
-		}
-
-		for(Node* adjNode:*n->getAdjNodes()){
-			Edge* e = getEdge(n,adjNode);
-			if(e == NULL){
-				continue;
-			}
-
-			if(algo::vecContains(disabledNodes,adjNode))
-				continue;
-			if(algo::vecContains(path,adjNode))
-				continue;
-
-			if(steps[adjNode] != steps[n] - 1)
-				continue;
-
-			stack.push_back(adjNode);
-			divergeNodes.push_back(n);
-		}
-
-	}
-
-	delete sential;
-	return r;
-}
-
-
-//ring to ring shorted paths
-V<PATHE> Graph::ringToRingPaths(PATHE ring0, PATHE ring1, V<PATHE> allRings){
-	map<N,int> steps = ringToOtherRings(ring0,allRings);
-	V<N> nodesOnRing0 = getNodesOnRing(ring0);
-	V<N> nodesOnRing1 = getNodesOnRing(ring1);
-	V<N> nodesOnAllRings;
-	V<N> nodesOnOherRings;
-	for(PATHE ring:allRings){
-		V<N> nodesOnRing = getNodesOnRing(ring);
-		nodesOnAllRings.insert(nodesOnAllRings.end(),nodesOnRing.begin(),nodesOnRing.end());
-	}
-
-	for(N n:nodesOnAllRings){
-		if(algo::vecContains(nodesOnRing0,n))
-			continue;
-		if(algo::vecContains(nodesOnRing1,n))
-			continue;
-
-		nodesOnOherRings.push_back(n);
-	}
-
-	V<PATHE> shortedPath = fromStepToShortedPath(steps,nodesOnRing1,nodesOnOherRings);
-	return shortedPath;
-
-}
-map<Node*,int> Graph::ringToOtherRings(vector<Edge*> ring,vector<vector<Edge*>> allRings){
-	vector<Node*> possibleNodes;
-
-	possibleNodes = getNodesOutAllRings(allRings);
-	vector<Node*> nodesOnOtherRings;
-	for(vector<Edge*> otherRing:allRings){
-		if(otherRing == ring )
-			continue;
-		vector<Node*> nodesOnOtherRing = getNodesOnRing(otherRing);
-		nodesOnOtherRings.insert(nodesOnOtherRings.end(),nodesOnOtherRing.begin(),nodesOnOtherRing.end());
-	}
-	//bread first search, mark every node move
-	vector<Node*> nodesOnRing = getNodesOnRing(ring);
-
-
-	map<Node*,int> steps;
-	for(Node* n:nodes){
-		steps[n] = 10000;
-	}
-
-
-
-	vector<Node*> nodesToTouch;
-	for(Node* n:nodesOnRing){
-		steps[n] = 0;
-		nodesToTouch.push_back(n);
-	}
-
-	while(nodesToTouch.size() > 0){
-		Node* n = nodesToTouch.front();
-		algo::pop_front(nodesToTouch);
-
-		for(Node* adjNode:*n->getAdjNodes()){
-			//if closed edge
-			Edge* e = getEdge(n,adjNode);
-			if(e == NULL)
-				continue;
-
-			if(e->isWall)
-				continue;
-
-			if(algo::vecContains(nodesOnOtherRings,adjNode)){
-				if(steps[adjNode] > steps[n]){
-					steps[adjNode] = steps[n] +1;
-				}
-			}
-
-			if(!algo::vecContains(possibleNodes,adjNode))
-				continue;
-
-			if(steps[adjNode] <= steps[n])
-				continue;
-			//
-			steps[adjNode] = steps[n]+1;
-			nodesToTouch.push_back(adjNode);
-
-		}
-
-	}
-
-
-	return steps;
-
-}
-
-/**/
-
-
-
-map<pair<PATHE,PATHE>,V<PATHE>> Graph::allRingShortPaths(V<PATHE> rings){
-	map<pair<PATHE,PATHE>,V<PATHE>> ringToRingShortedPaths;
-	for(auto it0 = rings.begin();it0 != rings.end()-1;it0++){
-		PATHE ring0 = *it0;
-		for(auto it1 = it0+1; it1 != rings.end(); it1++){
-			PATHE ring1 = * it1;
-			V<PATHE> paths =ringToRingPaths(ring0,ring1,rings);
-
-			int i = 0;
-			for(PATHE p:paths){
-
-				for(E e:p){
-					cout<<"path"<< i <<":"<< e->name << endl;
-				}
-				i++;
-			}
-			ringToRingShortedPaths[make_pair(ring0,ring1)] = paths;
-		}
-	}
-	return ringToRingShortedPaths;
-}
-
-V<PATHE> Graph::selectshortPaths(PATHE ring0, PATHE ring1,map<pair<PATHE,PATHE>,V<PATHE>> ringToRingShortedPaths){
-	pair<PATHE,PATHE> p = make_pair(ring0,ring1);
-  	return algo::map_select_pair(ringToRingShortedPaths,p);
-}
 
 
 bool Graph::pathIntercectPaths(PATHE p, V<PATHE> paths){
@@ -1914,208 +948,6 @@ bool Graph::pathIntercectPath(PATHE p0, PATHE p1){
 	return false;
 }
 
-V<V<PATHE>> Graph::connectRings(PATHE ringS,PATHE ringT,V<PATHE> rings){
-	map<pair<PATHE,PATHE>,V<PATHE>>ringToRingShortedPaths = allRingShortPaths(rings);
-
-	V<V<PATHE>> netWork;
-	V<PATHE> coveredRings;
-	//rings is head, ringt is tail, dfs to get all paths
-	V<PATHE> stack_path;
-	V<PATHE> stack_ring;
-	PATHE noPath = * new PATHE();
-	V<PATHE> divergePoint_path;
-	V<PATHE> divergePoint_ring;
-	V<PATHE> path_paths;
-	V<PATHE> path_rings;
-
-
-	path_rings.push_back(ringS);
-	for(PATHE ring:rings){
-		if(ring == ringS)
-			continue;
-
-		V<PATHE> paths_between = selectshortPaths(ringS,ring,ringToRingShortedPaths);
-		for(PATHE p:paths_between){
-			stack_path.push_back(p);
-			stack_ring.push_back(ring);
-			divergePoint_path.push_back(noPath);
-			divergePoint_ring.push_back(ringS);
-		}
-	}
-
-	while(stack_path.size()>0){
-		PATHE thisPath = stack_path.back();
-		stack_path.pop_back();
-		PATHE thisRing = stack_ring.back();
-		stack_ring.pop_back();
-		PATHE diverge_path = divergePoint_path.back();
-		divergePoint_path.pop_back();
-		PATHE diverge_ring = divergePoint_ring.back();
-		divergePoint_ring.pop_back();
-
-		if(diverge_path == noPath){
-			path_paths.clear();
-		}
-		algo::pop_To_Element(path_paths,diverge_path);
-
-		algo::pop_To_Element(path_rings,diverge_ring);
-		path_paths.push_back(thisPath);
-		path_rings.push_back(thisRing);
-
-		//find a path
-		if(thisRing == ringT){
-			netWork.push_back(path_paths);
-			for(PATHE ring:path_rings){
-				algo::distincAddVec(coveredRings,ring);
-			}
-			//if all rings are covered, return
-			if(coveredRings.size() == rings.size())
-				return netWork;
-
-			continue;
-
-		}
-		//add adj rings and paths
-		for(PATHE ring:rings){
-			if(algo::vecContains(path_rings,ring))
-				continue;
-
-			V<PATHE> paths_between = selectshortPaths(thisRing,ring,ringToRingShortedPaths);
-			for(PATHE p:paths_between){
-				//if paths intercect with path
-				if(pathIntercectPaths(p,path_paths))
-					continue;
-
-				stack_path.push_back(p);
-				stack_ring.push_back(ring);
-				divergePoint_path.push_back(thisPath);
-				divergePoint_ring.push_back(thisRing);
-			}
-
-		}
-
-	}
-
-
-	return netWork;
-
-}
-
-
-
-
-vector<Node*> Graph::getNodesOnRing(vector<Edge*> ring){
-	vector<Node*> r;
-	for(Edge* e:ring){
-		Node* n0 = getNode(e->x,e->y);
-		Node* n1 = getNode(e->s,e->t);
-		algo::distincAddVec(r,n0);
-		algo::distincAddVec(r,n1);
-	}
-
-	return r;
-}
-
-vector<Node*>  Graph::getNodesOutRing(vector<Edge*> ring){
-	vector<Node*> r;
-	vector<Node*> nodesOnRing = getNodesOnRing(ring);
-	vector<Node*> nodesInRing = getNodesInRing(ring);
-	for(Node* n:nodes){
-
-		if(algo::vecContains(nodesOnRing,n))
-			continue;
-
-		if(algo::vecContains(nodesInRing,n))
-			continue;
-
-		algo::distincAddVec(r,n);
-	}
-
-	return r;
-}
-
-vector<Node*>  Graph::getNodesInRing(vector<Edge*> ring){
-	vector<Node*> r;
-
-	for(Node* n:nodes){
-		if(nodeInsideRing(n,ring)){
-			algo::distincAddVec(r,n);
-		}
-	}
-
-	return r;
-}
-
-//if head can reach node, then it is outside the ring,
-bool Graph::nodeInsideRing(Node* n,vector<Edge*> ring){
-	Node* head = entrances.at(0);
-	//dfs
-
-	vector<Node*> nodeOnRing = getNodesOnRing(ring);
-	bool findNode = true;
-	vector<Node*> searchPath;
-	vector<Node*> stack;
-
-	stack.push_back(head);
-
-	while(stack.size()>0){
-		Node* seed = stack.back();
-		searchPath.push_back(seed);
-		stack.pop_back();
-		for(Node* adjNode:*seed->getAdjNodes()){
-
-
-
-			if(algo::vecContains(searchPath,adjNode))
-				continue;
-
-			//brink of ring
-			if(algo::vecContains(nodeOnRing,adjNode))
-				continue;
-
-			if(adjNode == n){
-				findNode = true;
-				break;
-			}
-
-			Edge* e = getEdge(seed,adjNode);
-
-			if(e->isOn){
-				stack.push_back(adjNode);
-			}
-		}
-
-		if(findNode){
-			return false;
-		}
-	}
-
-	return true;
-}
-vector<vector<Edge*>> Graph::getRingsFromEdges(vector<Edge*> edgeSet){
-	vector<vector<Edge*>> groups = getGroupsFromEdges(edgeSet);
-
-
-	vector<vector<Edge*>> rings;
-	for(Node* head:entrances){
-		for(vector<Edge*> group:groups){
-
-			bool isAPath = false;
-			for(Edge* groupE:group){
-				if(nodeOnEdge(head,groupE)){
-					isAPath = true;
-					break;
-				}
-			}
-
-			if(!isAPath){
-				rings.push_back(group);
-			}
-		}
-	}
-
-	return rings;
-}
 
 bool Graph::edgeOnEdge(Edge* e0, Edge* e1){
 	//same edge return false
@@ -2140,38 +972,175 @@ bool Graph::edgeOnEdge(Edge* e0, Edge* e1){
 
 
 }
-vector<vector<Edge*>> Graph::getGroupsFromEdges(vector<Edge*> edgeSet){
-	vector<vector<Edge*>> groups;
 
-	while(edgeSet.size()>0){
-		vector<Edge*> group;
-		Edge* firste = edgeSet.back();
-		group.push_back(firste);
-		edgeSet.pop_back();
 
-		bool findNewEdge = true;
-		while(findNewEdge){
-			findNewEdge = false;
-			for(Edge* e:edgeSet){
+//genearting random path from s to t
+bool Graph::dfsValveSharing(Node* s, Node* t, V<E>& path, V<E>& forbidEdges,V<N>& forbidNodes,map<E,E> shareValveMap){
 
-				for(Edge* groupE : group){
-					if(edgeOnEdge(e,groupE)){
-						algo::remove(edgeSet,e);
-						group.push_back(e);
-						findNewEdge = true;
-						break;
-					}
-				}
+	int dfsTryCount = 0;
+	//srand(time(NULL));
+	do{
+		vector<Node*> searchPath;
+		vector<Node*> stack;
+		V<N> joints;
+		stack.push_back(s);
+		joints.push_back(s);
 
-				if(findNewEdge)
-					break;
+		bool findT = false;
+		while(stack.size()>0){
+			Node* seed = stack.back();
+			N joint = joints.back();
+
+			stack.pop_back();
+			joints.pop_back();
+
+			algo::pop_To_Element(searchPath,joint);
+			searchPath.push_back(seed);
+
+			if(seed == t){
+				findT = true;
+				break;
+			}
+
+
+			//find a random adjNode
+			V<int> visitedAdjId;
+			while(visitedAdjId.size()<seed->getAdjEdges()->size()){
+				int randAdjNodeId = rand()%seed->getAdjEdges()->size();
+				if(algo::vecContains(visitedAdjId,randAdjNodeId))
+					continue;
+				else
+					visitedAdjId.push_back(randAdjNodeId);
+
+				Node* adjNode = (*seed->getAdjNodes()).at(randAdjNodeId);
+
+				if(adjNode->isBusy && adjNode != t)
+					continue;
+
+				if(algo::vecContains(forbidNodes,adjNode))
+					continue;
+
+				if(algo::vecContains(searchPath,adjNode))
+					continue;
+
+				Edge* e = getEdge(seed,adjNode);
+				if(e->isBusy)
+					continue;
+
+				stack.push_back(adjNode);
+				joints.push_back(seed);
 			}
 		}
 
-		groups.push_back(group);
+		if(!findT){
+			return false;
+
+		}
+
+		//findT, see if this match valve share protocal
+		V<E> searchPathE = pathNodesToEdges(searchPath);
+		V<E> shareEdges;
+		for(E e:searchPathE){
+			if(algo::mapContains(shareValveMap,e)){
+				E shareEdge = shareValveMap[e];
+				shareEdges.push_back(shareEdge);
+			}
+		}
+		bool illegalValveShare = false;
+		for(E e:shareEdges){
+			//cout<<"shareEdges are "<<e->name <<endl;
+			N n0 = getNode(e->x,e->y);
+			N n1 = getNode(e->s,e->t);
+			if(algo::vecContains(searchPath,n0))
+				illegalValveShare = true;
+
+			if(algo::vecContains(searchPath,n1))
+				illegalValveShare = true;
+
+			if(e->isBusy)
+				illegalValveShare = true;
+		}
+
+		if(!illegalValveShare){
+			path.clear();
+			algo::join2Vec(path,searchPathE);
+			algo::join2Vec(path,shareEdges);
+			return true;
+		}
+
+		//cout<<"illegal valver sharing"<<endl;
+		dfsTryCount++;
+
+	}while(dfsTryCount < 100);
+
+
+	//cout<<" no possible valve sharing path right now"<<endl;
+	return false;
+
+}
+
+//genearting random path from s to t
+bool Graph::dfs(Node* s, Node* t, V<E>& path, V<E>& forbidEdges,V<N>& forbidNodes){
+	//srand(time(NULL));
+
+	vector<Node*> searchPath;
+	vector<Node*> stack;
+	V<N> joints;
+	stack.push_back(s);
+	joints.push_back(s);
+
+	bool findT = false;
+	while(stack.size()>0){
+		Node* seed = stack.back();
+		N joint = joints.back();
+
+		stack.pop_back();
+		joints.pop_back();
+
+		algo::pop_To_Element(searchPath,joint);
+		searchPath.push_back(seed);
+
+		if(seed == t){
+			findT = true;
+			break;
+		}
+
+
+		//find a random adjNode
+		V<int> visitedAdjId;
+		while(visitedAdjId.size()<seed->getAdjEdges()->size()){
+			int randAdjNodeId = rand()%seed->getAdjEdges()->size();
+			if(algo::vecContains(visitedAdjId,randAdjNodeId))
+				continue;
+			else
+				visitedAdjId.push_back(randAdjNodeId);
+
+			Node* adjNode = (*seed->getAdjNodes()).at(randAdjNodeId);
+
+			if(adjNode->isBusy && adjNode != t)
+				continue;
+
+			if(algo::vecContains(searchPath,adjNode))
+				continue;
+
+			Edge* e = getEdge(seed,adjNode);
+			if(e->isBusy)
+				continue;
+
+			stack.push_back(adjNode);
+			joints.push_back(seed);
+		}
 	}
 
-	return groups;
+	if(findT){
+		V<E> searchPathE = pathNodesToEdges(searchPath);
+		path.clear();
+		algo::join2Vec(path,searchPathE);
+		return true;
+	}
+	else{
+		return false;
+	}
 
 }
 
@@ -2183,8 +1152,10 @@ bool Graph::dfs(Node* s, Node* t){
 
 	while(stack.size()>0){
 		Node* seed = stack.back();
+		//cout<<"dfs seed "<< seed->name<<endl;
+
 		searchPath.push_back(seed);
-		stack.erase(stack.end());
+		stack.pop_back();
 		for(Node* adjNode:*seed->getAdjNodes()){
 
 			if(adjNode == t)
@@ -2194,6 +1165,7 @@ bool Graph::dfs(Node* s, Node* t){
 				continue;
 
 			Edge* e = getEdge(seed,adjNode);
+			//cout<<"adj edge is "<<e->name<<endl;
 			if(e->isOn){
 				stack.push_back(adjNode);
 			}
@@ -2203,203 +1175,433 @@ bool Graph::dfs(Node* s, Node* t){
 	return false;
 }
 
-V<N> Graph::nodesOnPath(const V<E>& path){
-	V<N> r;
-	for(E e:path){
-		Node* n0 = getNode(e->x,e->y);
-		Node* n1 = getNode(e->s,e->t);
-		algo::distincAddVec(r,n0);
-		algo::distincAddVec(r,n1);
-	}
 
-	return r;
-}
+Graph* Graph::fitGraphIntoGrid(){
+	//locate bounding box  of otherG
+	V<float> boundingbox;
+	findBoundingBox(boundingbox);
 
-V<E> Graph::shortestPathToNodes(N start, V<N> destinations, V<N> forbiddenNodes){
-	V<N> queue;
+	Graph* g = new Graph();
+	g->initByBoundingBox(boundingbox);
+	//remove edge intercect with egdgs in graph
+	V<E> edgesToRemove;
+	for(E newE:g->edges){
+		if(newE->x == 3 && newE->y == 6 && newE->s == 3 && newE->t ==  7)
+			cout <<"stop"<<endl;
+		for(E e:edges){
+			if(!e->intercectEdge(newE))
+				continue;
+			//if they share one node continue
+			N n0 = g->getNode(newE->x,newE->y);
+			N n1 = g->getNode(newE->s,newE->t);
+			N n2 = getNode(e->x,e->y);
+			N n3 = getNode(e->s,e->t);
 
-	map<N,int> stepToStart;
-	for(Node* n:nodes){
-		stepToStart[n] = BIG_INTEGER;
-	}
-	stepToStart[start] = 0;
-	bool findDestinations = false;
-	queue.push_back(start);
-	while(queue.size()>0){
-		N nextNode = queue.front();
-		algo::pop_front(queue);
-
-		for(N adjNode:*nextNode->getAdjNodes()){
-
-			if(algo::vecContains(forbiddenNodes,adjNode))
+			if(n0->sameNode(n2) || n0->sameNode(n3))
+				continue;
+			if(n1->sameNode(n2) || n1->sameNode(n3))
 				continue;
 
-			if(stepToStart[adjNode] > stepToStart[nextNode]+1){
+			algo::distincAddVec(edgesToRemove,newE);
+			cout << "im about remove "<< newE->name<<endl;
 
-				stepToStart[adjNode] = stepToStart[nextNode] + 1;
+		}
+	}
+		//system("read");
+	for(E eToRemove:edgesToRemove){
+		N n0 = g->getNode(eToRemove->x,eToRemove->y);
+		N n1 = g->getNode(eToRemove->s,eToRemove->t);
+		if(getEdge(n0,n1)!=NULL)
+			continue;
+		g->removeEdge(eToRemove);
+	}
+
+	//add edge in orighin graph
+	for(N n:nodes){
+		for(N adjNode:*n->getAdjNodes()){
+			if(g->getEdge(n,adjNode)!=NULL)
+				continue;
+
+			E newE = new Edge(n,adjNode);
+			g->addEdge(newE);
+		}
+	}
+
+	for(N head:entrances){
+		N newHead = g->getNode(head->x,head->y);
+		g->entrances.push_back(newHead);
+	}
+	for(N head:exits){
+		N newExits = g->getNode(head->x,head->y);
+		g->exits.push_back(newExits);
+	}
+
+
+	return g;
+
+}
+
+
+void Graph::findBoundingBox(V<float>& boundingbox){
+	boundingbox.clear();
+	float ldx,ldy,urx,ury;
+	ldx = M;
+	ldy = M;
+	urx = -M;
+	urx = -M;
+	for(N n:nodes){
+		if(n->x < ldx)
+			ldx = n->x;
+		if(n->y < ldy)
+			ldy = n->y;
+
+		if(n->x > urx)
+			urx = n->x;
+		if(n->y > ury)
+			ury = n->y;
+	}
+
+	boundingbox.push_back(ldx);
+	boundingbox.push_back(ldy);
+	boundingbox.push_back(urx);
+	boundingbox.push_back(ury);
+}
+
+void Graph::initByBoundingBox(V<float>& boundingBox){
+	//give number to each Node; Hash nodes
+	int id = 0;
+	float ldx = boundingBox[0];
+	float ldy = boundingBox[1];
+	float rux = boundingBox[2];
+	float ruy = boundingBox[3];
+	for(int i = ldx; i<= rux; i++){
+		for(int j = ldy; j <= ruy; j ++){
+
+			Node* node = new Node(i,j);
+			nodes.push_back(node);
+			float index = algo::hash2Int(i,j);
+
+			hashNodes[index] =  node;
+			id ++;
+
+		}
+	}
+
+
+
+	//assign joint nodes to each node
+	for(int i = ldx; i<= rux; i++){
+		for(int j = ldy; j <= ruy; j ++){
+			//cout << "im node" << getNode(i,j)->name << endl;
+			if(i>=ldx+1){
+				getNode(i,j)->addAdjNodes(getNode(i-1,j));
+
 			}
+			if(j>=ldy+1){
+				getNode(i,j)->addAdjNodes(getNode(i,j-1));
 
-			if(algo::vecContains(destinations,adjNode)){
-				findDestinations = true;
+			}
+			if(i<=rux-1){
+				Node* n1 = getNode(i,j);
+				Node* n2 = getNode(i+1,j);
+				n1->addAdjNodes(n2);
+
+			}
+			if(j<=ruy-1){
+				getNode(i,j)->addAdjNodes(getNode(i,j+1));
+
+			}
+		}
+	}
+
+	hashAllEdges();
+
+
+}
+
+
+bool Graph::howShareValvesMostLikeOTherPlan(const V<V<E>>& paths,const V<V<E>>& cuts,const V<E>& newEdges,V<E>& sharePlan, const V<E>& otherNewEdges,const V<E>& otherSharePlan){
+	sortEdgesAndNodes();
+	sharePlan.clear();
+	map<E,E> otherSharePlanMap; //
+
+	for(int i = 0; i < otherNewEdges.size();i++){
+		E e = otherNewEdges[i];
+		E shareE = otherSharePlan[i];
+		otherSharePlanMap[e] = shareE;
+	}
+
+	//srand(time(NULL));
+	map<E,int> thissharePlan;
+	int count = 0;
+	int maxCount = 10;
+	while(true){
+		if(count >= maxCount)
+			return false;
+		for(E e:newEdges){
+			if(algo::mapContains(otherSharePlanMap,e)){
+				thissharePlan[e] = otherSharePlanMap[e]->id;
 			}
 			else{
-				queue.push_back(adjNode);
+				thissharePlan[e] = rand()%edges.size() + 1;//cause id 0 resvered for no edge
 			}
 
+		}
+		V<E> tmpSharePlan;
+		for(E e:newEdges){
+			int eid = thissharePlan[e];
+			E shareE = getEdgeById(eid);
+			tmpSharePlan.push_back(shareE);
 
 		}
+		cout<< "try share plan: "<<endl;
+		for(E e:newEdges){
+			cout<<e->name <<" ";
+
+		}
+		cout<<endl;
+		for(E e:tmpSharePlan){
+
+			cout<<e->name<<" ";
+		}
+		cout<<endl;
+		bool allPass = true;
+		for(V<E> path:paths){
+			if(!validPathWithShareValves(path,newEdges,tmpSharePlan)){
+				allPass = false;
+				break;
+			}
+		}
+		if(allPass){
+			for(V<E> cut:cuts){
+				if(!validCutWithShareValves(cut,newEdges,tmpSharePlan)){
+					allPass = false;
+					break;
+				}
+			}
+		}
+
+		if(allPass){
+			cout<<"find share plan"<<endl;
+			for(E e:newEdges){
+				cout<<e->name <<" ";
+
+			}
+			cout << endl;
+			for(E e:tmpSharePlan){
+				sharePlan.push_back(e);
+				cout<<e->name<<" ";
+			}
+			cout<<endl;
+
+			return true;
+		}
+		count++;
+	}
 
 
-		if(findDestinations)
+
+	return false;
+
+}
+
+void Graph::howShareVavles(V<V<E>>& paths, V<V<E>>& cuts, V<E>& newEdges,V<E>& sharePlan){
+	sortEdgesAndNodes();
+
+
+	//generating all possible share plans
+	V<E> oldEdges;
+	for(E e:edges){
+		if(!algo::vecContains(newEdges,e))
+			oldEdges.push_back(e);
+	}
+
+	int count = 0;
+
+	Draw d;
+	//d.drawPath(oldEdges,this,"oldEdges");
+
+	//d.drawPath(newEdges,this,"newEdges");
+	//srand(time(NULL));
+	while(true){
+		sharePlan.clear();
+		int digit = count;
+		for(int i = 0; i < newEdges.size();i++){
+			//int j = digit % oldEdges.size();
+			int j = rand()%oldEdges.size();
+
+			E e = oldEdges[j];
+			sharePlan.push_back(e);
+			digit = digit/oldEdges.size();
+			cout << e->name << " ";
+		}
+
+		cout<<endl;
+		count++;
+		if(digit > 0){
+			cout<< count;
 			break;
+		}
 
-
-	}
-
-	V<N> disableNodes;
-
-	V<V<E>> shortestPaths = fromStepToShortedPath(stepToStart,destinations,disableNodes);
-
-
-	return shortestPaths.at(0);
-
-
-
-}
-
-//return all nodes between start and end
-V<N> Graph::traverseSortedPath(N start, N end,const V<E>& sortedPath){
-	V<N> sortedPathNode =edgesToNodes(&sortedPath);
-	assert(algo::vecContains(sortedPathNode,start));
-	assert(algo::vecContains(sortedPathNode,end));
-
-	N head = sortedPathNode.front();
-	N tail = sortedPathNode.back();
-	V<N> queue;
-	V<N> stack;
-
-	stack.push_back(start);
-	while(stack.size()>0){
-		N n = stack.back();
-		stack.pop_back();
-		queue.push_back(n);
-		for(N adjNode:*n->getAdjNodes()){
-			E e = getEdge(n,adjNode);
-
-			if(!algo::vecContains(sortedPath,e)){
-				continue;
+		bool allPass = true;
+		for(V<E> path:paths){
+			if(!validPathWithShareValves(path,newEdges,sharePlan)){
+				allPass = false;
+				break;
 			}
-			if(adjNode == head || adjNode == tail){
-				algo::pop_To_Element(queue,start);
-				continue;
+		}
+		if(allPass){
+			for(V<E> cut:cuts){
+				if(!validCutWithShareValves(cut,newEdges,sharePlan)){
+					allPass = false;
+					break;
+				}
+			}
+		}
+
+		if(allPass){
+			cout<<"find share plan"<<endl;
+			for(E e:newEdges){
+				cout<<e->name <<" ";
+
+			}
+			cout << endl;
+			for(E e:sharePlan){
+				cout<<e->name<<" ";
 			}
 
-			if(algo::vecContains(queue,adjNode))
-				continue;
-
-			if(adjNode == end){
-				queue.push_back(adjNode);
-				return queue;
-			}
-			stack.push_back(adjNode);
+			break;
 		}
 	}
-	return queue;
-
+	system("read");
 }
-//connect loop to a path and leave out edges cannot fit in
-void Graph::connectLoopToPath(V<E>& loop, V<E>& path){
-	V<N> nLoop = nodesOnPath(loop);
-	V<N> nPath = nodesOnPath(path);
 
-	//0 from node on loop by shortest path to path
-	//1 from node on loop by shortest path to path
-	E eWithSmallestPrice = loop.at(0);
-	int smallEestPrice = BIG_INTEGER;
-	for(E e:loop){
-		break;
+
+
+bool Graph::validPathWithShareValves(const V<E>& path, const V<E>& newEdges, V<E>& sharePlan){
+	//open all valves which are shared
+	for(E e:edges){
+		e->isOn = false;
+	}
+
+	for(E e:path)
+		e->isOn = true;
+
+	for(int i = 0; i<newEdges.size();i++){
+		E newEdge = newEdges[i];
+		E shareEdge = sharePlan[i];
+
+		if(newEdge->isOn)
+			shareEdge->isOn = true;
+
+		if(shareEdge->isOn)
+			newEdge->isOn = true;
+	}
+
+
+	//close one valve on the path at a time see if dfs can find target
+	bool allPass = true;
+	for(E e:path){
+		e->isOn = false;
+
+		if(dfs(entrances[0],exits[0])){
+			allPass = false;
+			break;
+		}
+	}
+
+	return allPass;
+}
+
+bool Graph::validCutWithShareValves(const V<E>& cut,const V<E>& newEdges, V<E>& sharePlan){
+	//open all valves which are shared
+	for(E e:edges){
+		e->isOn = true;
+	}
+
+	for(E e:cut)
+		e->isOn = false;
+
+	for(int i = 0; i<newEdges.size();i++){
+		E newEdge = newEdges[i];
+		E shareEdge = sharePlan[i];
+
+		if(!newEdge->isOn)
+			shareEdge->isOn = false;
+
+		if(!shareEdge->isOn)
+			newEdge->isOn = false;
+	}
+
+
+	//close one valve on the path at a time see if dfs can find target
+	bool allPass = true;
+	for(E e:cut){
+		e->isOn = true;
+
+		if(!dfs(entrances[0],exits[0])){
+			allPass = false;
+			break;
+		}
+	}
+
+	return allPass;
+}
+
+void Graph::sortEdgesAndNodes(){
+	for(N n:nodes){
+		n->adjEdges->clear();
+		n->adjNodes->clear();
+	}
+	for(E e:edges){
 		N n0 = getNode(e->x,e->y);
-		N n1 = getNode(e->s,e->t);
-		//find shortest path from n0 to path
-		V<N> forbiddenNodes;
-		forbiddenNodes.clear();
-		forbiddenNodes.insert(forbiddenNodes.end(),nLoop.begin(),nLoop.end());
-		V<E> n0ShortestPath = shortestPathToNodes(n0,nPath,forbiddenNodes);
-		V<N> n0ShortestPathInNodes = nodesOnPath(n0ShortestPath);
-
-		forbiddenNodes.insert(forbiddenNodes.end(), n0ShortestPathInNodes.begin(),n0ShortestPathInNodes.end());
-		V<E> n1ShortestPath = shortestPathToNodes(n1,nPath,forbiddenNodes);
-		V<N> n1ShortestPathInNodes = nodesOnPath(n1ShortestPath);
-		sortEdgesInPath(&path);
-		V<N> pathSortedN = edgesToNodes(&path);
-		N nStart = NULL;
-		N nEnd = NULL;
-		for(N n:nPath){
-			for(N nElse:n0ShortestPathInNodes){
-				if(n == nElse)
-					nStart = n;
-			}
-			for(N nElse:n1ShortestPathInNodes){
-				if(n == nElse)
-				nEnd= n;
-			}
-		}
-		V<N> pathBetween = traverseSortedPath(nStart,nEnd,path);
-		V<E> pathBetweenEdges = pathNodesToEdges(pathBetween);
-		cout << " im " << e ->name<<endl;
-		cout << " my price is " <<pathBetweenEdges.size() << endl;
-		if(pathBetweenEdges.size() < smallEestPrice){
-			eWithSmallestPrice = e;
-			smallEestPrice = pathBetweenEdges.size();
-		}
+		N n1 =getNode(e->s,e->t);
+		assert(n0!=NULL);
+		assert(n1!=NULL);
+		algo::distincAddVec(*n0->adjEdges,e);
+		algo::distincAddVec(*n1->adjEdges,e);
+		algo::distincAddVec(*n0->adjNodes,n1);
+		algo::distincAddVec(*n1->adjNodes,n0);
 	}
-	eWithSmallestPrice = loop.at(1);
-	E e = eWithSmallestPrice;
-	N n0 = getNode(e->x,e->y);
-	N n1 = getNode(e->s,e->t);
-	//find shortest path from n0 to path
-	V<N> forbiddenNodes;
-	forbiddenNodes.insert(forbiddenNodes.end(),nLoop.begin(),nLoop.end());
-	V<E> n0ShortestPath = shortestPathToNodes(n0,nPath,forbiddenNodes);
-	V<N> n0ShortestPathInNodes = nodesOnPath(n0ShortestPath);
-
-	forbiddenNodes.insert(forbiddenNodes.end(), n0ShortestPathInNodes.begin(),n0ShortestPathInNodes.end());
-	V<E> n1ShortestPath = shortestPathToNodes(n1,nPath,forbiddenNodes);
-	V<N> n1ShortestPathInNodes = nodesOnPath(n1ShortestPath);
-	sortEdgesInPath(&path);
-	V<N> pathSortedN = edgesToNodes(&path);
-	N nStart = NULL;
-	N nEnd = NULL;
-	for(N n:nPath){
-		for(N nElse:n0ShortestPathInNodes){
-			if(n == nElse)
-				nStart = n;
-		}
-		for(N nElse:n1ShortestPathInNodes){
-			if(n == nElse)
-			nEnd= n;
-		}
-	}
-	V<N> pathBetween = traverseSortedPath(nStart,nEnd,path);
-	V<E> pathBetweenEdges = pathNodesToEdges(pathBetween);
-	if(pathBetweenEdges.size() < smallEestPrice){
-		eWithSmallestPrice = e;
-		smallEestPrice = pathBetweenEdges.size();
-	}
-	//remove e from loop
-	algo::remove(loop,e);
-	//remove pathBetween from path
-	algo::remove(path,pathBetweenEdges);
-
-	//join path with shotest path 1 and shortest path2 and loop
-	algo::join2Vec(path,n0ShortestPath);
-	algo::join2Vec(path,n1ShortestPath);
-	algo::join2Vec(path,loop);
-	//clear loop
-	loop.clear();
-	//join loop with e and pathBetween
-	loop.push_back(e);
-	algo::join2Vec(loop,pathBetweenEdges);
-
+	cout<<"finish sorting edges and nodes in graph"<<endl;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

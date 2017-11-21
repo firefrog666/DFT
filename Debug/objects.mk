@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lgurobi_c++ -lgurobi60
+LIBS := -lgurobi_c++ -lgurobi75
 

@@ -1,4 +1,4 @@
-/* Copyright 2015, Gurobi Optimization, Inc. */
+/* Copyright 2017, Gurobi Optimization, Inc. */
  
 #ifndef _GUROBI_C_H
 #define _GUROBI_C_H
@@ -23,9 +23,9 @@ typedef struct _GRBenv GRBenv;
 
 /* Version numbers */
 
-#define GRB_VERSION_MAJOR     6
-#define GRB_VERSION_MINOR     0
-#define GRB_VERSION_TECHNICAL 5
+#define GRB_VERSION_MAJOR     7
+#define GRB_VERSION_MINOR     5
+#define GRB_VERSION_TECHNICAL 1
 
 /* Default and max priority for Compute Server jobs */
 
@@ -64,6 +64,9 @@ typedef struct _GRBenv GRBenv;
 #define GRB_ERROR_NOT_SUPPORTED            10024
 #define GRB_ERROR_EXCEED_2B_NONZEROS       10025
 #define GRB_ERROR_INVALID_PIECEWISE_OBJ    10026
+#define GRB_ERROR_UPDATEMODE_CHANGE        10027
+#define GRB_ERROR_CLOUD                    10028
+#define GRB_ERROR_MODEL_MODIFICATION       10029
 
 /* Constraint senses */
 
@@ -100,7 +103,7 @@ typedef struct _GRBenv GRBenv;
 #define GRB_MAX_NAMELEN    255
 #define GRB_MAX_STRLEN     512
 #define GRB_MAX_CONCURRENT 64
-/* Copyright 2014, Gurobi Optimization, Inc. */
+/* Copyright 2016, Gurobi Optimization, Inc. */
 
 /* Query interface */
 
@@ -215,7 +218,7 @@ int __stdcall
 int __stdcall
   GRBcbsetparam(void *cbdata, const char *paramname, const char *newvalue);
 int __stdcall
-  GRBcbsolution(void *cbdata, const double *solution);
+  GRBcbsolution(void *cbdata, const double *solution, double *objvalP);
 int __stdcall
   GRBcbcut(void *cbdata, int cutlen, const int *cutind, const double *cutval,
           char cutsense, double cutrhs);
@@ -234,6 +237,7 @@ int __stdcall
 #define GRB_INT_ATTR_NUMVARS       "NumVars"       /* # of vars */
 #define GRB_INT_ATTR_NUMSOS        "NumSOS"        /* # of sos constraints */
 #define GRB_INT_ATTR_NUMQCONSTRS   "NumQConstrs"   /* # of quadratic constraints */
+#define GRB_INT_ATTR_NUMGENCONSTRS "NumGenConstrs" /* # of general constraints */
 #define GRB_INT_ATTR_NUMNZS        "NumNZs"        /* # of nz in A */
 #define GRB_DBL_ATTR_DNUMNZS       "DNumNZs"       /* # of nz in A */
 #define GRB_INT_ATTR_NUMQNZS       "NumQNZs"       /* # of nz in Q */
@@ -247,7 +251,9 @@ int __stdcall
 #define GRB_INT_ATTR_IS_MIP        "IsMIP"         /* Is model a MIP? */
 #define GRB_INT_ATTR_IS_QP         "IsQP"          /* Model has quadratic obj? */
 #define GRB_INT_ATTR_IS_QCP        "IsQCP"         /* Model has quadratic constr? */
+#define GRB_INT_ATTR_IS_MULTIOBJ   "IsMultiObj"    /* Model has multiple objectives? */
 #define GRB_STR_ATTR_SERVER        "Server"        /* Name of compute server */
+#define GRB_INT_ATTR_LICENSE_EXPIRATION "LicenseExpiration" /* License expiration date */
 
 /* Variable attributes */
 
@@ -260,6 +266,9 @@ int __stdcall
 #define GRB_INT_ATTR_BRANCHPRIORITY "BranchPriority"  /* MIP branch priority */
 #define GRB_STR_ATTR_VARNAME        "VarName"         /* Variable name */
 #define GRB_INT_ATTR_PWLOBJCVX      "PWLObjCvx"       /* Convexity of variable PWL obj */
+#define GRB_DBL_ATTR_VARHINTVAL     "VarHintVal"
+#define GRB_INT_ATTR_VARHINTPRI     "VarHintPri"
+#define GRB_INT_ATTR_PARTITION      "Partition"
 
 /* Constraint attributes */
 
@@ -275,16 +284,29 @@ int __stdcall
 #define GRB_CHAR_ATTR_QCSENSE "QCSense" /* QC sense ('<', '>', or '=') */
 #define GRB_STR_ATTR_QCNAME   "QCName"  /* QC name */
 
+/* General constraint attributes */
+
+#define GRB_INT_ATTR_GENCONSTRTYPE  "GenConstrType"  /* Type of general constraint */
+#define GRB_STR_ATTR_GENCONSTRNAME  "GenConstrName"  /* Name of general constraint */
+
 /* Model statistics */
 
-#define GRB_DBL_ATTR_MAX_COEFF     "MaxCoeff"    /* Max (abs) nz coeff in A */
-#define GRB_DBL_ATTR_MIN_COEFF     "MinCoeff"    /* Min (abs) nz coeff in A */
-#define GRB_DBL_ATTR_MAX_BOUND     "MaxBound"    /* Max (abs) finite var bd */
-#define GRB_DBL_ATTR_MIN_BOUND     "MinBound"    /* Min (abs) var bd */
-#define GRB_DBL_ATTR_MAX_OBJ_COEFF "MaxObjCoeff" /* Max (abs) obj coeff */
-#define GRB_DBL_ATTR_MIN_OBJ_COEFF "MinObjCoeff" /* Min (abs) obj coeff */
-#define GRB_DBL_ATTR_MAX_RHS       "MaxRHS"      /* Max (abs) rhs coeff */
-#define GRB_DBL_ATTR_MIN_RHS       "MinRHS"      /* Min (abs) rhs coeff */
+#define GRB_DBL_ATTR_MAX_COEFF      "MaxCoeff"     /* Max (abs) nz coeff in A */
+#define GRB_DBL_ATTR_MIN_COEFF      "MinCoeff"     /* Min (abs) nz coeff in A */
+#define GRB_DBL_ATTR_MAX_BOUND      "MaxBound"     /* Max (abs) finite var bd */
+#define GRB_DBL_ATTR_MIN_BOUND      "MinBound"     /* Min (abs) var bd */
+#define GRB_DBL_ATTR_MAX_OBJ_COEFF  "MaxObjCoeff"  /* Max (abs) obj coeff */
+#define GRB_DBL_ATTR_MIN_OBJ_COEFF  "MinObjCoeff"  /* Min (abs) obj coeff */
+#define GRB_DBL_ATTR_MAX_RHS        "MaxRHS"       /* Max (abs) rhs coeff */
+#define GRB_DBL_ATTR_MIN_RHS        "MinRHS"       /* Min (abs) rhs coeff */
+#define GRB_DBL_ATTR_MAX_QCCOEFF    "MaxQCCoeff"   /* Max (abs) nz coeff in Q */
+#define GRB_DBL_ATTR_MIN_QCCOEFF    "MinQCCoeff"   /* Min (abs) nz coeff in Q */
+#define GRB_DBL_ATTR_MAX_QOBJ_COEFF "MaxQObjCoeff" /* Max (abs) obj coeff of quadratic part */
+#define GRB_DBL_ATTR_MIN_QOBJ_COEFF "MinQObjCoeff" /* Min (abs) obj coeff of quadratic part */
+#define GRB_DBL_ATTR_MAX_QCLCOEFF   "MaxQCLCoeff"  /* Max (abs) nz coeff in linear part of Q */
+#define GRB_DBL_ATTR_MIN_QCLCOEFF   "MinQCLCoeff"  /* Min (abs) nz coeff in linear part of Q */
+#define GRB_DBL_ATTR_MAX_QCRHS      "MaxQCRHS"     /* Max (abs) rhs of Q */
+#define GRB_DBL_ATTR_MIN_QCRHS      "MinQCRHS"     /* Min (abs) rhs of Q */
 
 /* Model solution attributes */
 
@@ -293,6 +315,8 @@ int __stdcall
 #define GRB_DBL_ATTR_OBJVAL        "ObjVal"      /* Solution objective */
 #define GRB_DBL_ATTR_OBJBOUND      "ObjBound"    /* Best bound on solution */
 #define GRB_DBL_ATTR_OBJBOUNDC     "ObjBoundC"   /* Continuous bound */
+#define GRB_DBL_ATTR_POOLOBJBOUND  "PoolObjBound" /* Best bound on pool solution */
+#define GRB_DBL_ATTR_POOLOBJVAL    "PoolObjVal"  /* Solution objective for solutionnumber */
 #define GRB_DBL_ATTR_MIPGAP        "MIPGap"      /* MIP optimality gap */
 #define GRB_INT_ATTR_SOLCOUNT      "SolCount"    /* # of solutions found */
 #define GRB_DBL_ATTR_ITERCOUNT     "IterCount"   /* Iters performed (simplex) */
@@ -306,7 +330,8 @@ int __stdcall
 /* Variable attributes related to the current solution */
 
 #define GRB_DBL_ATTR_X         "X"         /* Solution value */
-#define GRB_DBL_ATTR_Xn        "Xn"        /* Alternate MIP solution */
+#define GRB_DBL_ATTR_XN        "Xn"        /* Alternate MIP solution */
+#define GRB_DBL_ATTR_BARX      "BarX"      /* Best barrier iterate */
 #define GRB_DBL_ATTR_RC        "RC"        /* Reduced costs */
 #define GRB_DBL_ATTR_VDUALNORM "VDualNorm" /* Dual norm square */
 #define GRB_INT_ATTR_VBASIS    "VBasis"    /* Variable basis status */
@@ -375,18 +400,19 @@ int __stdcall
 
 /* IIS */
 
-#define GRB_INT_ATTR_IIS_MINIMAL "IISMinimal" /* Boolean: Is IIS Minimal? */
-#define GRB_INT_ATTR_IIS_LB      "IISLB"      /* Boolean: Is var LB in IIS? */
-#define GRB_INT_ATTR_IIS_UB      "IISUB"      /* Boolean: Is var UB in IIS? */
-#define GRB_INT_ATTR_IIS_CONSTR  "IISConstr"  /* Boolean: Is constr in IIS? */
-#define GRB_INT_ATTR_IIS_SOS     "IISSOS"     /* Boolean: Is SOS in IIS? */
-#define GRB_INT_ATTR_IIS_QCONSTR "IISQConstr" /* Boolean: Is QConstr in IIS? */
+#define GRB_INT_ATTR_IIS_MINIMAL   "IISMinimal"   /* Boolean: Is IIS Minimal? */
+#define GRB_INT_ATTR_IIS_LB        "IISLB"        /* Boolean: Is var LB in IIS? */
+#define GRB_INT_ATTR_IIS_UB        "IISUB"        /* Boolean: Is var UB in IIS? */
+#define GRB_INT_ATTR_IIS_CONSTR    "IISConstr"    /* Boolean: Is constr in IIS? */
+#define GRB_INT_ATTR_IIS_SOS       "IISSOS"       /* Boolean: Is SOS in IIS? */
+#define GRB_INT_ATTR_IIS_QCONSTR   "IISQConstr"   /* Boolean: Is QConstr in IIS? */
+#define GRB_INT_ATTR_IIS_GENCONSTR "IISGenConstr" /* Boolean: Is general constr in IIS? */
 
 /* Tuning */
 
 #define GRB_INT_ATTR_TUNE_RESULTCOUNT "TuneResultCount"
 
-/* advanced simplex features */
+/* Advanced simplex features */
 
 #define GRB_DBL_ATTR_FARKASDUAL  "FarkasDual"
 #define GRB_DBL_ATTR_FARKASPROOF "FarkasProof"
@@ -398,6 +424,33 @@ int __stdcall
 
 #define GRB_INT_ATTR_VARPRESTAT "VarPreStat"
 #define GRB_DBL_ATTR_PREFIXVAL  "PreFixVal"
+
+/* Multi objective attribute, controlled by parameter ObjNumber (= i) */
+
+#define GRB_DBL_ATTR_OBJN         "ObjN"         /* ith objective */
+#define GRB_DBL_ATTR_OBJNVAL      "ObjNVal"      /* Solution objective for Multi-objectives */
+#define GRB_DBL_ATTR_OBJNCON      "ObjNCon"      /* constant term */
+#define GRB_DBL_ATTR_OBJNWEIGHT   "ObjNWeight"   /* weight */
+#define GRB_INT_ATTR_OBJNPRIORITY "ObjNPriority" /* priority */
+#define GRB_DBL_ATTR_OBJNRELTOL   "ObjNRelTol"   /* relative tolerance */
+#define GRB_DBL_ATTR_OBJNABSTOL   "ObjNAbsTol"   /* absolute tolerance */
+#define GRB_STR_ATTR_OBJNNAME     "ObjNName"     /* name */
+#define GRB_INT_ATTR_NUMOBJ       "NumObj"       /* number of objectives */
+#define GRB_INT_ATTR_NUMSTART     "NumStart"     /* number of MIP starts */
+
+/* Alternate define */
+
+#define GRB_DBL_ATTR_Xn "Xn"
+
+/* General constraints */
+
+#define GRB_GENCONSTR_MAX         0
+#define GRB_GENCONSTR_MIN         1
+#define GRB_GENCONSTR_ABS         2
+#define GRB_GENCONSTR_AND         3
+#define GRB_GENCONSTR_OR          4
+#define GRB_GENCONSTR_INDICATOR   5
+
 
 /*
    CALLBACKS
@@ -486,6 +539,24 @@ int __stdcall
   GRBgetsos(GRBmodel *model, int *nummembersP, int *sostype, int *beg,
             int *ind, double *weight, int start, int len);
 int __stdcall
+  GRBgetgenconstrMax(GRBmodel *model, int genconstr, int *resvarP,
+                     int *nvarsP, int *vars, double *constantP);
+int __stdcall
+  GRBgetgenconstrMin(GRBmodel *model, int genconstr, int *resvarP,
+                     int *nvarsP, int *vars, double *constantP);
+int __stdcall
+  GRBgetgenconstrAbs(GRBmodel *model, int genconstr, int *resvarP, int *argvarP);
+int __stdcall
+  GRBgetgenconstrAnd(GRBmodel *model, int genconstr, int *resvarP,
+                     int *nvarsP, int *vars);
+int __stdcall
+  GRBgetgenconstrOr(GRBmodel *model, int genconstr, int *resvarP,
+                    int *nvarsP, int *vars);
+int __stdcall
+  GRBgetgenconstrIndicator(GRBmodel *model, int genconstr, int *binvarP, int *binvalP,
+                           int *nvarsP, int *vars, double *vals,
+                           char *senseP, double *rhsP);
+int __stdcall
   GRBgetq(GRBmodel *model, int *numqnzP, int *qrow, int *qcol, double *qval);
 int __stdcall
   GRBgetqconstr(GRBmodel *model, int qconstr,
@@ -520,7 +591,7 @@ int __stdcall
 GRBmodel * __stdcall
   GRBrelaxmodel(GRBmodel *model);
 int __stdcall
-  GRBconverttofixed(GRBmodel *lp);
+  GRBconverttofixed(GRBmodel *model);
 GRBmodel * __stdcall
   GRBpresolvemodel(GRBmodel *model);
 GRBmodel * __stdcall
@@ -529,7 +600,24 @@ GRBmodel * __stdcall
   GRBfeasibility(GRBmodel *model);
 GRBmodel * __stdcall
   GRBlinearizemodel(GRBmodel *model);
-/* Copyright 2014, Gurobi Optimization, Inc. */
+
+#define MALLOCCB_ARGS size_t size, void *syscbusrdata
+#define CALLOCCB_ARGS size_t nmemb, size_t size, void *syscbusrdata
+#define REALLOCCB_ARGS void *ptr, size_t size, void *syscbusrdata
+#define FREECB_ARGS void *ptr, void *syscbusrdata
+#define THREADCREATECB_ARGS void **threadP, void (*start_routine)(void *), void *arg, void *syscbusrdata
+#define THREADJOINCB_ARGS void *thread, void *syscbusrdata
+
+int __stdcall
+  GRBloadenvsyscb(GRBenv **envP, const char *logfilename,
+                  void * (__stdcall *malloccb)(MALLOCCB_ARGS),
+                  void * (__stdcall *calloccb)(CALLOCCB_ARGS),
+                  void * (__stdcall *realloccb)(REALLOCCB_ARGS),
+                  void (__stdcall *freecb)(FREECB_ARGS),
+                  int (__stdcall *threadcreatecb)(THREADCREATECB_ARGS),
+                  void (__stdcall *threadjoincb)(THREADJOINCB_ARGS),
+                  void *syscbusrdata);
+/* Copyright 2016, Gurobi Optimization, Inc. */
 
 int __stdcall
   GRBreadmodel(GRBenv *env, const char *filename, GRBmodel **modelP);
@@ -537,6 +625,12 @@ int __stdcall
   GRBread(GRBmodel *model, const char *filename);
 int __stdcall
   GRBwrite(GRBmodel *model, const char *filename);
+int __stdcall
+  GRBismodelfile(const char *filename);
+int __stdcall
+  GRBfiletype(const char *filename);
+int __stdcall
+ GRBisrecordfile(const char *filename);
 
 int __stdcall
   GRBnewmodel(GRBenv *env, GRBmodel **modelP, const char *Pname, int numvars,
@@ -601,6 +695,27 @@ int __stdcall
   GRBaddsos(GRBmodel *model, int numsos, int nummembers, int *types,
             int *beg, int *ind, double *weight);
 int __stdcall
+  GRBaddgenconstrMax(GRBmodel *model, const char *name,
+                     int resvar, int nvars, const int *vars,
+                     double constant);
+int __stdcall
+  GRBaddgenconstrMin(GRBmodel *model, const char *name,
+                     int resvar, int nvars, const int *vars,
+                     double constant);
+int __stdcall
+  GRBaddgenconstrAbs(GRBmodel *model, const char *name,
+                     int resvar, int argvar);
+int __stdcall
+  GRBaddgenconstrAnd(GRBmodel *model, const char *name,
+                     int resvar, int nvars, const int *vars);
+int __stdcall
+  GRBaddgenconstrOr(GRBmodel *model, const char *name,
+                    int resvar, int nvars, const int *vars);
+int __stdcall
+  GRBaddgenconstrIndicator(GRBmodel *lp, const char *name,
+                           int binvar, int binval, int nvars, const int *vars,
+                           const double *vals, char sense, double rhs);
+int __stdcall
   GRBaddqconstr(GRBmodel *model, int numlnz, int *lind, double *lval,
                 int numqnz, int *qrow, int *qcol, double *qval,
                 char sense, double rhs, const char *QCname);
@@ -615,6 +730,8 @@ int __stdcall
   GRBdelconstrs(GRBmodel *model, int len, int *ind);
 int __stdcall
   GRBdelsos(GRBmodel *model, int len, int *ind);
+int __stdcall
+  GRBdelgenconstrs(GRBmodel *model, int len, int *ind);
 int __stdcall
   GRBdelqconstrs(GRBmodel *model, int len, int *ind);
 int __stdcall
@@ -637,7 +754,7 @@ int __stdcall
   GRBfreemodel(GRBmodel *model);
 
 int __stdcall
-  GRBcomputeIIS(GRBmodel *lp);
+  GRBcomputeIIS(GRBmodel *model);
 
 /* simplex advanced routines */
 
@@ -649,25 +766,25 @@ typedef struct _GRBsvec
 } GRBsvec;
 
 int __stdcall
-  GRBFSolve(GRBmodel *lp, GRBsvec *b, GRBsvec *x);
+  GRBFSolve(GRBmodel *model, GRBsvec *b, GRBsvec *x);
 
 int __stdcall
-  GRBBinvColj(GRBmodel *lp, int j, GRBsvec *x);
+  GRBBinvColj(GRBmodel *model, int j, GRBsvec *x);
 
 int __stdcall
-  GRBBinvj(GRBmodel *lp, int j, GRBsvec *x);
+  GRBBinvj(GRBmodel *model, int j, GRBsvec *x);
 
 int __stdcall
-  GRBBSolve(GRBmodel *lp, GRBsvec *b, GRBsvec *x);
+  GRBBSolve(GRBmodel *model, GRBsvec *b, GRBsvec *x);
 
 int __stdcall
-  GRBBinvi(GRBmodel *lp, int i, GRBsvec *x);
+  GRBBinvi(GRBmodel *model, int i, GRBsvec *x);
 
 int __stdcall
-  GRBBinvRowi(GRBmodel *lp, int i, GRBsvec *x);
+  GRBBinvRowi(GRBmodel *model, int i, GRBsvec *x);
 
 int __stdcall
-  GRBgetBasisHead(GRBmodel *lp, int *bhead);
+  GRBgetBasisHead(GRBmodel *model, int *bhead);
 
 /* Model status codes (after call to GRBoptimize()) */
 
@@ -685,6 +802,7 @@ int __stdcall
 #define GRB_NUMERIC        12
 #define GRB_SUBOPTIMAL     13
 #define GRB_INPROGRESS     14
+#define GRB_USER_OBJ_LIMIT 15
 
 /* Basis status info */
 
@@ -692,16 +810,14 @@ int __stdcall
 #define GRB_NONBASIC_LOWER -1
 #define GRB_NONBASIC_UPPER -2
 #define GRB_SUPERBASIC     -3
-
-/* Copyright 2014, Gurobi Optimization, Inc. */
+/* Copyright 2016, Gurobi Optimization, Inc. */
 
 /* Undocumented routines */
 
 int __stdcall
   GRBstrongbranch(GRBmodel *model, int num, int *cand,
                   double *downobjbd, double *upobjbd, int *statusP);
-
-/* Copyright 2014, Gurobi Optimization, Inc. */
+/* Copyright 2016, Gurobi Optimization, Inc. */
 
 /**************/
 /* Parameters */
@@ -715,6 +831,8 @@ int __stdcall
 #define GRB_DBL_PAR_NODELIMIT      "NodeLimit"
 #define GRB_INT_PAR_SOLUTIONLIMIT  "SolutionLimit"
 #define GRB_DBL_PAR_TIMELIMIT      "TimeLimit"
+#define GRB_DBL_PAR_BESTOBJSTOP    "BestObjStop"
+#define GRB_DBL_PAR_BESTBDSTOP     "BestBdStop"
 
 /* Tolerances */
 
@@ -751,6 +869,7 @@ int __stdcall
 /* MIP */
 
 #define GRB_INT_PAR_BRANCHDIR         "BranchDir"
+#define GRB_INT_PAR_DEGENMOVES        "DegenMoves"
 #define GRB_INT_PAR_DISCONNECTED      "Disconnected"
 #define GRB_DBL_PAR_HEURISTICS        "Heuristics"
 #define GRB_DBL_PAR_IMPROVESTARTGAP   "ImproveStartGap"
@@ -764,6 +883,7 @@ int __stdcall
 #define GRB_INT_PAR_NORELHEURISTIC    "NoRelHeuristic"
 #define GRB_INT_PAR_PUMPPASSES        "PumpPasses"
 #define GRB_INT_PAR_RINS              "RINS"
+#define GRB_INT_PAR_STARTNODELIMIT    "StartNodeLimit"
 #define GRB_INT_PAR_SUBMIPNODES       "SubMIPNodes"
 #define GRB_INT_PAR_SYMMETRY          "Symmetry"
 #define GRB_INT_PAR_VARBRANCH         "VarBranch"
@@ -772,29 +892,33 @@ int __stdcall
 
 /* MIP cuts */
 
-#define GRB_INT_PAR_CUTS          "Cuts"
+#define GRB_INT_PAR_CUTS            "Cuts"
 
-#define GRB_INT_PAR_CLIQUECUTS    "CliqueCuts"
-#define GRB_INT_PAR_COVERCUTS     "CoverCuts"
-#define GRB_INT_PAR_FLOWCOVERCUTS "FlowCoverCuts"
-#define GRB_INT_PAR_FLOWPATHCUTS  "FlowPathCuts"
-#define GRB_INT_PAR_GUBCOVERCUTS  "GUBCoverCuts"
-#define GRB_INT_PAR_IMPLIEDCUTS   "ImpliedCuts"
-#define GRB_INT_PAR_MIPSEPCUTS    "MIPSepCuts"
-#define GRB_INT_PAR_MIRCUTS       "MIRCuts"
-#define GRB_INT_PAR_MODKCUTS      "ModKCuts"
-#define GRB_INT_PAR_ZEROHALFCUTS  "ZeroHalfCuts"
-#define GRB_INT_PAR_NETWORKCUTS   "NetworkCuts"
-#define GRB_INT_PAR_SUBMIPCUTS    "SubMIPCuts"
+#define GRB_INT_PAR_CLIQUECUTS      "CliqueCuts"
+#define GRB_INT_PAR_COVERCUTS       "CoverCuts"
+#define GRB_INT_PAR_FLOWCOVERCUTS   "FlowCoverCuts"
+#define GRB_INT_PAR_FLOWPATHCUTS    "FlowPathCuts"
+#define GRB_INT_PAR_GUBCOVERCUTS    "GUBCoverCuts"
+#define GRB_INT_PAR_IMPLIEDCUTS     "ImpliedCuts"
+#define GRB_INT_PAR_PROJIMPLIEDCUTS "ProjImpliedCuts"
+#define GRB_INT_PAR_MIPSEPCUTS      "MIPSepCuts"
+#define GRB_INT_PAR_MIRCUTS         "MIRCuts"
+#define GRB_INT_PAR_STRONGCGCUTS    "StrongCGCuts"
+#define GRB_INT_PAR_MODKCUTS        "ModKCuts"
+#define GRB_INT_PAR_ZEROHALFCUTS    "ZeroHalfCuts"
+#define GRB_INT_PAR_NETWORKCUTS     "NetworkCuts"
+#define GRB_INT_PAR_SUBMIPCUTS      "SubMIPCuts"
+#define GRB_INT_PAR_INFPROOFCUTS    "InfProofCuts"
 
-#define GRB_INT_PAR_CUTAGGPASSES  "CutAggPasses"
-#define GRB_INT_PAR_CUTPASSES     "CutPasses"
-#define GRB_INT_PAR_GOMORYPASSES  "GomoryPasses"
+#define GRB_INT_PAR_CUTAGGPASSES    "CutAggPasses"
+#define GRB_INT_PAR_CUTPASSES       "CutPasses"
+#define GRB_INT_PAR_GOMORYPASSES    "GomoryPasses"
 
 /* Distributed algorithms */
 
 #define GRB_STR_PAR_WORKERPOOL      "WorkerPool"
 #define GRB_STR_PAR_WORKERPASSWORD  "WorkerPassword"
+#define GRB_INT_PAR_WORKERPORT      "WorkerPort"
 
 /* Other */
 
@@ -823,15 +947,27 @@ int __stdcall
 #define GRB_DBL_PAR_PRESOS1BIGM       "PreSOS1BigM"
 #define GRB_DBL_PAR_PRESOS2BIGM       "PreSOS2BigM"
 #define GRB_INT_PAR_PRESPARSIFY       "PreSparsify"
+#define GRB_INT_PAR_PREMIQCPFORM      "PreMIQCPForm"
 #define GRB_INT_PAR_QCPDUAL           "QCPDual"
+#define GRB_INT_PAR_RECORD            "Record"
 #define GRB_STR_PAR_RESULTFILE        "ResultFile"
 #define GRB_INT_PAR_SEED              "Seed"
 #define GRB_INT_PAR_THREADS           "Threads"
 #define GRB_DBL_PAR_TUNETIMELIMIT     "TuneTimeLimit"
 #define GRB_INT_PAR_TUNERESULTS       "TuneResults"
+#define GRB_INT_PAR_TUNECRITERION     "TuneCriterion"
 #define GRB_INT_PAR_TUNETRIALS        "TuneTrials"
 #define GRB_INT_PAR_TUNEOUTPUT        "TuneOutput"
 #define GRB_INT_PAR_TUNEJOBS          "TuneJobs"
+#define GRB_INT_PAR_UPDATEMODE        "UpdateMode"
+#define GRB_INT_PAR_OBJNUMBER         "ObjNumber"
+#define GRB_INT_PAR_MULTIOBJMETHOD    "MultiObjMethod"
+#define GRB_INT_PAR_MULTIOBJPRE       "MultiObjPre"
+#define GRB_INT_PAR_POOLSOLUTIONS     "PoolSolutions"
+#define GRB_DBL_PAR_POOLGAP           "PoolGap"
+#define GRB_INT_PAR_POOLSEARCHMODE    "PoolSearchMode"
+#define GRB_INT_PAR_STARTNUMBER       "StartNumber"
+#define GRB_INT_PAR_IGNORENAMES       "IgnoreNames"
 #define GRB_STR_PAR_DUMMY             "Dummy"
 
 /* Parameter enumerations */
@@ -848,12 +984,13 @@ int __stdcall
 #define GRB_PRESOLVE_CONSERVATIVE 1
 #define GRB_PRESOLVE_AGGRESSIVE   2
 
-#define GRB_METHOD_AUTO                    -1
-#define GRB_METHOD_PRIMAL                   0
-#define GRB_METHOD_DUAL                     1
-#define GRB_METHOD_BARRIER                  2
-#define GRB_METHOD_CONCURRENT               3
-#define GRB_METHOD_DETERMINISTIC_CONCURRENT 4
+#define GRB_METHOD_AUTO                            -1
+#define GRB_METHOD_PRIMAL                           0
+#define GRB_METHOD_DUAL                             1
+#define GRB_METHOD_BARRIER                          2
+#define GRB_METHOD_CONCURRENT                       3
+#define GRB_METHOD_DETERMINISTIC_CONCURRENT         4
+#define GRB_METHOD_DETERMINISTIC_CONCURRENT_SIMPLEX 5
 
 #define GRB_BARHOMOGENEOUS_AUTO -1
 #define GRB_BARHOMOGENEOUS_OFF   0
@@ -886,6 +1023,16 @@ void __stdcall
   GRBsetsignal(GRBmodel *model);
 void __stdcall
   GRBterminate(GRBmodel *model);
+int __stdcall
+  GRBreplay(const char *filename);
+int __stdcall
+  GRBsetobjective(GRBmodel *model, int sense, double constant,
+                  int lnz, int *lind, double *lval,
+                  int qnz, int *qrow, int *qcol, double *qval);
+int __stdcall
+  GRBsetobjectiven(GRBmodel *model, int index, int priority, double weight,
+                   double abstol, double reltol, char *name, double constant,
+                   int lnz, int *lind, double *lval);
 void __stdcall
   GRBclean2(int *lenP, int *ind, double *val);
 void __stdcall
@@ -956,6 +1103,7 @@ int __stdcall
   GRBloadenv(GRBenv **envP, const char *logfilename);
 int __stdcall
   GRBloadenvadv(GRBenv **envP, const char *logfilename,
+                int apitype, int major, int minor, int tech,
                 int (__stdcall *cb)(CB_ARGS), void *usrdata);
 int __stdcall
   GRBloadclientenv(GRBenv **envP, const char *logfilename,
@@ -965,13 +1113,28 @@ int __stdcall
   GRBloadclientenvadv(GRBenv **envP, const char *logfilename,
                       const char *computeservers, int port,
                       const char *password, int priority, double timeout,
+                      int apitype, int major, int minor, int tech,
                       int (__stdcall *cb)(CB_ARGS), void *usrdata);
+int __stdcall
+  GRBloadcloudenv(GRBenv **envP, const char *logfilename,
+                  const char *accessID, const char *secretKey,
+                  const char *pool);
+int __stdcall
+  GRBloadcloudenvadv(GRBenv **envP, const char *logfilename,
+                     const char *accessID, const char *secretKey,
+                     const char *pool, int apitype, int major,
+                     int minor, int tech,
+                     int (__stdcall *cb)(CB_ARGS), void *usrdata);
 GRBenv *__stdcall
   GRBgetenv(GRBmodel *model);
 GRBenv *__stdcall
   GRBgetconcurrentenv(GRBmodel *model, int num);
 void __stdcall
   GRBdiscardconcurrentenvs(GRBmodel *model);
+GRBenv *__stdcall
+  GRBgetmultiobjenv(GRBmodel *model, int num);
+void __stdcall
+  GRBdiscardmultiobjenvs(GRBmodel *model);
 void __stdcall
   GRBreleaselicense(GRBenv *env);
 void __stdcall
@@ -992,7 +1155,7 @@ char * __stdcall
 int __stdcall
   GRBlisttokens(void);
 int __stdcall
-  GRBlistclients(const char *computeServer);
+  GRBlistclients(const char *computeServer, int port);
 int __stdcall
   GRBchangeuserpassword(const char *computeServer, int port,
                         const char *admin_password,
@@ -1007,6 +1170,8 @@ int __stdcall
 int __stdcall
   GRBkilljob(const char *computeServer, int port, const char *jobID,
              const char *admin_password);
+int __stdcall
+  GRBshutdown(const char *computeServer, int port, const char *admin_password);
 
 /* Tuning */
 
@@ -1021,15 +1186,10 @@ int __stdcall
   GRBgettunelog(GRBmodel *model, int i, char **logP);
 int __stdcall
   GRBtunemodeladv(GRBmodel *model, GRBmodel *ignore, GRBmodel *hint);
-
-/* Deprecated */
-
-#define GRB_INT_PAR_PREMIQPMETHOD   "PreMIQPMethod"
-/* Copyright 2014, Gurobi Optimization, Inc. */
+/* Copyright 2016, Gurobi Optimization, Inc. */
 
 /* Async interface */
 
 int __stdcall
   GRBsync(GRBmodel *model);
-
 #endif

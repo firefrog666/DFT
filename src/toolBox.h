@@ -5,14 +5,15 @@ using namespace std;
 
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <algorithm>
 #include <vector>
 #include <map>
 
 
 #define M 10000
-#define BIG_INTEGER 10000
-#define INTEGERBOUND 100
+#define BIG_INTEGER	 1000
+#define INTEGERBOUND 1000
 #define R 0.1
 #define RED 0
 #define BLUE 1
@@ -24,6 +25,29 @@ using namespace std;
 #define N Node*
 #define E Edge*
 
+
+#define cs const
+#define cp const P&
+#define opr operator
+const  double eps = 1e-8;
+inline int sig(double x) {return (x>eps)-(x<-eps);}
+
+struct P{
+    double x, y;
+    void in() { scanf("%lf%lf", &x, &y); }
+    P(double x=0.0, double y=0.0) : x(x), y(y) {}
+
+    P opr-(cp a)cs { return P(x-a.x, y-a.y); }
+    double opr^(cp a)cs { return x*a.y - y*a.x; }    //叉积
+    double opr*(cp a)cs {return x*a.x + y*a.y;}
+
+    double cross(P a, P b) { return (a-*this) ^ (b-*this); }
+    double dot(P a, P b)  { return (a-(*this)) * (b-(*this)); }
+    bool on_seg(P a, P b) { return !sig(cross(a, b)) && sig(dot(a, b)) <= 0; }//判断是否在点上
+};
+
+
+
 //const char* drawGraphSh = "drawGraph.sh";
 string s(int i);
 
@@ -34,9 +58,24 @@ string S(int i);
 string S(const char* s);
 string S(string s);
 
+
 class  algo final{
 
 public:
+	bool static seg(P a, P b, P c, P d) { //判断相交(a - b)线段 、(c - d)线段
+	    if(a.on_seg(c, d) || b.on_seg(c, d) || c.on_seg(a, b) || d.on_seg(a, b))
+	        return true;
+	    return sig(a.cross(b, c)*a.cross(b, d)) < 0 && sig(c.cross(d, a)*c.cross(d, b)) < 0;
+	}
+
+	template<typename T>
+	static T stringToNumber(string& s){
+		T r;
+		istringstream abuffer(s);
+		abuffer>>r;
+		return r;
+	}
+
 	template<typename T>
 	static bool vecContains(const  std::vector<T>& vec, T& element)
 	{
@@ -44,6 +83,17 @@ public:
 			return false;
 		else
 			return true;
+	}
+
+	template<typename T>
+	static bool vecsContains(const  std::vector<std::vector<T>>& vecs, T& element)
+	{
+		for(V<T> vec:vecs){
+			if(vecContains(vec,element))
+				return true;
+		}
+
+		return false;
 	}
 
 	template<typename key, typename T>
@@ -147,6 +197,43 @@ public:
 		float  dig_100 = b * 10000;
 		float dig_1000 = a * 1000000;
 		return dig_1 + dig_10 + dig_100 + dig_1000;
+
+	}
+
+	template<typename T>
+	static void writeNumbersInFile(const char* fileName, const V<T>& numbers){
+		ofstream file;
+ 		//ofstream file;
+ 		if(!file.is_open())
+ 			file.open(fileName);
+
+
+ 		for(int i = 0; i<= numbers.size()-1; i++)
+ 		{
+ 			file<<numbers.at(i)<<endl;
+ 		}
+
+ 		file.close();
+
+	}
+	template<typename T>
+	static void readNumbersInFile(const char* fileName,  V<T>& numbers){
+		  string line;
+		  ifstream file (fileName);
+		  if (file.is_open())
+		  {
+		    while ( getline (file,line) )
+		    {
+		      T number;
+				istringstream abuffer(line);
+				abuffer>>number;
+		    	numbers.push_back(number);
+		    }
+		    file.close();
+		  }
+
+
+		  return;
 
 	}
 
